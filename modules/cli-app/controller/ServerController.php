@@ -2,10 +2,12 @@
 /**
  * Server controller
  * @package cli-app
- * @version 0.0.2
+ * @version 0.0.3
  */
 
 namespace CliApp\Controller;
+
+use Cli\Library\Bash;
 
 class ServerController extends \CliApp\Controller
 {

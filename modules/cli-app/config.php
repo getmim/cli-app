@@ -2,12 +2,12 @@
 /**
  * CLI Application
  * @package cli-app 
- * @version 0.0.2
+ * @version 0.0.3
  */
 
 return [
     '__name' => 'cli-app',
-    '__version' => '0.0.2',
+    '__version' => '0.0.3',
     '__git' => 'git@github.com:getphun/cli-app.git',
     '__license' => 'MIT',
     '__author' => [
