@@ -2,7 +2,7 @@
 /**
  * Module controller
  * @package cli-app
- * @version 0.0.2
+ * @version 0.0.5
  */
 
 namespace CliApp\Controller;
@@ -137,9 +137,7 @@ class ModuleController extends \CliApp\Controller
                 return;
         }
         
-        $app_conf = $here . '/etc/config/main.php';
-        if(is_file($app_conf))
-            Config::init($here);
+        Config::init($here);
         
         Bash::echo('The confirmed module(s) successfully removed');
     }

@@ -2,7 +2,7 @@
 /**
  * Config library
  * @package cli-app
- * @version 0.0.2
+ * @version 0.0.5
  */
 
 namespace CliApp\Library;
@@ -327,7 +327,15 @@ class Config
     
     static function init(string $here): void{
         $nl = PHP_EOL;
-        $module_dir  = $here . '/modules';
+        
+        $module_dir = $here . '/modules';
+        if(!is_dir($module_dir))
+            return;
+        
+        $app_config_file = $here . '/etc/config/main.php';
+        if(!is_file($app_config_file))
+            return;
+        
         $configs = [[
             '_modules' => []
         ]];
@@ -352,7 +360,7 @@ class Config
             $configs[0]['_modules'][] = $mod;
         }
         
-        $configs[] = include $here . '/etc/config/main.php';
+        $configs[] = include $app_config_file;
         $env = file_get_contents($here . '/etc/.env');
         $env_config_file = $here . '/etc/config/' . $env . '.php';
         if(is_file($env_config_file))

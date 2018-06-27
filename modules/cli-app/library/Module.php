@@ -2,7 +2,7 @@
 /**
  * Module library
  * @package cli-app
- * @version 0.0.4
+ * @version 0.0.5
  */
 
 namespace CliApp\Library;
@@ -249,6 +249,10 @@ class Module
         if($ask && !Bash::ask($ask_conf))
             return true;
         
+        // make some file here so the remover don't remove it
+        $unremoval = $here . '/.stop';
+        touch($unremoval);
+        
         $module_config = include $module_conf_file;
         
         // remove the module
@@ -256,6 +260,8 @@ class Module
             Bash::error('Unable to remove the module');
             return false;
         }
+        
+        unlink($unremoval);
         
         return true;
     }

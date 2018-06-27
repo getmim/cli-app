@@ -2,12 +2,12 @@
 /**
  * CLI Application
  * @package cli-app 
- * @version 0.0.4
+ * @version 0.0.5
  */
 
 return [
     '__name' => 'cli-app',
-    '__version' => '0.0.4',
+    '__version' => '0.0.5',
     '__git' => 'git@github.com:getphun/cli-app.git',
     '__license' => 'MIT',
     '__author' => [
@@ -20,7 +20,9 @@ return [
     ],
     '__dependencies' => [
         'required' => [
-            'cli' => true
+            [
+                'cli' => null
+            ]
         ],
         'optional' => []
     ],
