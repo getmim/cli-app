@@ -2,7 +2,7 @@
 /**
  * Module library
  * @package cli-app
- * @version 0.0.2
+ * @version 0.0.4
  */
 
 namespace CliApp\Library;
@@ -228,6 +228,7 @@ class Module
         
         // Remove the tmp files
         Fs::rmdir($temp->base);
+        Fs::cleanUp(dirname($temp->base));
         
         return true;
     }
@@ -298,6 +299,7 @@ class Module
         
         // Remove the tmp files
         Fs::rmdir($temp->base);
+        Fs::cleanUp(dirname($temp->base));
         
         return true;
     }
