@@ -8,11 +8,15 @@ tools diinstall.
 Di bawah ini adalah perintah-perintah yang dilayani oleh module ini:
 
 ```
-    mim app init
+mim app init
 mim app config
-    mim app install [module[ module[ ...]]]
+mim app install [module[ module[ ...]]] | -
 mim app module
-    mim app remove [module[ module[ ...]]]
+mim app remove [module[ module[ ...]]] | -
 mim app server
-    mim app update [module[ module[ ...]]]
+mim app update [module[ module[ ...]]] | -
 ```
+
+Nilai `-` pada perintah `install`, `update`, dan `remove` berarti melakukan aksi
+tersebut ke semua module yang teridentifikasi. Contohnya, untuk meng-update semua
+module yang terinstall, jalankan perintah `mim app update -`.

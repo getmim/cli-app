@@ -2,13 +2,37 @@
 /**
  * Module controller
  * @package cli-app
- * @version 0.0.1
+ * @version 0.0.2
  */
 
 namespace CliApp\Controller;
 
+use Cli\Library\Bash;
+use \CliApp\Library\{
+    Module,
+    Config
+};
+
 class ModuleController extends \CliApp\Controller
 {
+    private function filterArgModules(array $modules): array{
+        $result = [];
+        foreach($modules as $module){
+            if($module === '-'){
+                $module_db_file = getcwd() . '/etc/modules.php';
+                if(!is_file($module_db_file))
+                    Bash::error('Please run the command under exists application');
+                $module_db = include $module_db_file;
+                foreach($module_db as $name => $uri)
+                    $result[$name] = $uri;
+            }else{
+                $result[$module] = null;
+            }
+        }
+        
+        return $result;
+    }
+    
     public function indexAction(){
         $here = getcwd();
         // expected modules file
@@ -16,12 +40,7 @@ class ModuleController extends \CliApp\Controller
         $module_dir  = $here . '/modules';
         
         if(!$this->isAppBase($here))
-            $this->error('Please run the command under exists application');
-        
-//         if(!is_file($module_file))
-//             $this->error('Please run the command under exists application');
-//         if(!is_dir($module_dir))
-//             $this->error('Please run the command under exists application');
+            Bash::error('Please run the command under exists application');
         
         $modules = include $module_file;
         
@@ -38,7 +57,7 @@ class ModuleController extends \CliApp\Controller
             }
             
             $printed[] = $name;
-            $this->echo(' - ' . $name . ' ' . $version);
+            Bash::echo(' - ' . $name . ' ' . $version);
         }
         
         $dirs = \Mim\Library\Fs::scan($module_dir);
@@ -49,19 +68,79 @@ class ModuleController extends \CliApp\Controller
             if(!is_dir($mod_dir))
                 continue;
             
-            $this->echo(' - ' . $dir . ' (Not registered)');
+            Bash::echo(' - ' . $dir . ' (Not registered)');
         }
     }
     
     public function installAction(){
-        $this->echo('Do it later');
+        $modules = $this->filterArgModules($this->req->param->modules);
+        if(!$modules)
+            Bash::error('No module to process');
+        
+        $here = getcwd();
+        
+        // install all selected modules
+        foreach($modules as $name => $uri){
+            $module_config_file = null;
+            
+            if(!is_null($uri) || preg_match('!^[a-z0-9-]+$!', $name))
+                $module_config_file = $here . '/modules/' . $name . '/config.php';
+            
+            if($module_config_file && is_file($module_config_file)){
+                Bash::echo('Module `' . $name . '` already there, skip installation');
+                continue;
+            }
+            
+            if(!Module::install($here, $name, $uri))
+                return;
+        }
+        
+        Config::init($here);
+        
+        Bash::echo('The module(s) successfully installed');
     }
     
     public function updateAction(){
-        $this->echo('Do it later');
+        $modules = $this->filterArgModules($this->req->param->modules);
+        if(!$modules)
+            Bash::error('No module to process');
+        
+        $here = getcwd();
+        
+        // update all selected modules
+        foreach($modules as $name => $uri){
+            $module_config_file = $here . '/modules/' . $name . '/config.php';
+            if(!is_file($module_config_file)){
+                Bash::error('Module `' . $name . '` is not installed. Skipping...', false);
+                continue;
+            }
+            
+            if(!Module::update($here, $name, $uri))
+                return;
+        }
+        
+        Config::init($here);
+        
+        Bash::echo('All module successfully updated');
     }
     
     public function removeAction(){
-        $this->echo('Do it later');
+        $modules = $this->filterArgModules($this->req->param->modules);
+        if(!$modules)
+            Bash::error('No module to process');
+        
+        $here = getcwd();
+        
+        // remove all selected modules
+        foreach($modules as $name => $uri){
+            if(!Module::remove($here, $name))
+                return;
+        }
+        
+        $app_conf = $here . '/etc/config/main.php';
+        if(is_file($app_conf))
+            Config::init($here);
+        
+        Bash::echo('The confirmed module(s) successfully removed');
     }
 }

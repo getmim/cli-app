@@ -2,7 +2,7 @@
 /**
  * Server controller
  * @package cli-app
- * @version 0.0.1
+ * @version 0.0.2
  */
 
 namespace CliApp\Controller;
@@ -14,11 +14,11 @@ class ServerController extends \CliApp\Controller
         // expected config file
         $config_file = $here . '/etc/cache/config.php';
         if(!is_file($config_file))
-            $this->error('Please run the command under exists application');
+            Bash::error('Please run the command under exists application');
         $config = include $config_file;
         
         if(!isset($config->server))
-            $this->error('Server test case not found');
+            Bash::error('Server test case not found');
     
         $servers = $config->server;
         $result = [];
@@ -70,16 +70,16 @@ class ServerController extends \CliApp\Controller
                      . str_pad('test', $length->test, ' ')
                      . str_pad('info', $length->info, ' ');
         
-        $this->echo('');
-        $this->echo($table_title);
-        $this->echo(str_repeat(' ', strlen($table_title)));
+        Bash::echo('');
+        Bash::echo($table_title);
+        Bash::echo(str_repeat(' ', strlen($table_title)));
         foreach($result as $res){
             $row = str_pad(($res->success?'[x]':'[ ]'), 9, ' ')
                  . str_pad($res->module, $length->module, ' ')
                  . str_pad($res->test, $length->test, ' ')
                  . str_pad($res->info, $length->info, ' ');
-            $this->echo($row);
+            Bash::echo($row);
         }
-        $this->echo('');
+        Bash::echo('');
     }
 }

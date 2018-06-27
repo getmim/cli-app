@@ -2,12 +2,12 @@
 /**
  * CLI Application
  * @package cli-app 
- * @version 0.0.1
+ * @version 0.0.2
  */
 
 return [
     '__name' => 'cli-app',
-    '__version' => '0.0.1',
+    '__version' => '0.0.2',
     '__git' => 'git@github.com:getphun/cli-app.git',
     '__license' => 'MIT',
     '__author' => [
@@ -20,7 +20,6 @@ return [
     ],
     '__dependencies' => [
         'required' => [
-            'core' => true,
             'cli' => true
         ],
         'optional' => []
@@ -29,8 +28,12 @@ return [
         'classes' => [
             'CliApp\\Controller' => [
                 'type' => 'file',
-                'base' => 'modules/cli-app/library/Controller.php',
+                'base' => 'modules/cli-app/system/Controller.php',
                 'children' => 'modules/cli-app/controller'
+            ],
+            'CliApp\\Library' => [
+                'type' => 'file',
+                'base' => 'modules/cli-app/library'
             ]
         ]
     ],
