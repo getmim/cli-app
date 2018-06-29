@@ -2,12 +2,12 @@
 /**
  * CLI Application
  * @package cli-app 
- * @version 0.0.5
+ * @version 0.0.7
  */
 
 return [
     '__name' => 'cli-app',
-    '__version' => '0.0.5',
+    '__version' => '0.0.7',
     '__git' => 'git@github.com:getphun/cli-app.git',
     '__license' => 'MIT',
     '__author' => [
@@ -120,5 +120,33 @@ return [
                 'handler' => 'CliApp\\Controller\\Server::test'
             ]
         ]
+    ],
+
+    'cli' => [
+    	'autocomplete' => [
+    		'!^app (install|remove|update)( .*)?$!' => [
+    			'priority' => 5,
+    			'handler' => [
+                    'class' => 'CliApp\\Library\\Autocomplete',
+                    'method' => 'module'
+                ]
+    		],
+
+    		'!^app (config|init|module|server)$!' => [
+    			'priority' => 4,
+    			'handler' => [
+                    'class' => 'CliApp\\Library\\Autocomplete',
+                    'method' => 'none'
+                ]
+    		],
+
+    		'!^app( [a-z]*)?$!' => [
+    			'priority' => 3,
+    			'handler' => [
+                    'class' => 'CliApp\\Library\\Autocomplete',
+                    'method' => 'app'
+                ]
+    		]
+    	]
     ]
 ];
