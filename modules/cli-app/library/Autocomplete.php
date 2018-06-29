@@ -2,7 +2,7 @@
 /**
  * Autocomplete provider
  * @package cli-app
- * @version 0.0.7
+ * @version 0.0.8
  */
 
 namespace CliApp\Library;
@@ -14,7 +14,11 @@ class Autocomplete
 	}
 
 	static function module(array $args): string{
-		$modules = include BASEPATH . '/etc/modules.php';
+		$mod_file = getcwd() . '/etc/modules.php';
+		if(!is_file($mod_file))
+			return '1';
+
+		$modules = include $mod_file;
 		$modules = array_keys($modules);
 
 		$result = [];
