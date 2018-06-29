@@ -7,10 +7,16 @@
 
 namespace CliApp\Library;
 
-class Autocomplete
+class Autocomplete extends \Cli\Autocomplete
 {
-	static function app(array $args): string{
-		return 'config init install module remove server update';
+	static function command(array $args): string{
+		$farg = $args[1] ?? null;
+		$result = ['config', 'init', 'install', 'module', 'remove', 'server', 'update'];
+
+		if(!$farg)
+			return trim(implode(' ', $result));
+
+		return parent::lastArg($farg, $result);
 	}
 
 	static function module(array $args): string{
@@ -28,9 +34,5 @@ class Autocomplete
 		}
 
 		return implode(' ', $result);
-	}
-	
-	static function none(): string{
-		return '1';
 	}
 }

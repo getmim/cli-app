@@ -144,7 +144,7 @@ return [
     			'priority' => 3,
     			'handler' => [
                     'class' => 'CliApp\\Library\\Autocomplete',
-                    'method' => 'app'
+                    'method' => 'command'
                 ]
     		]
     	]
