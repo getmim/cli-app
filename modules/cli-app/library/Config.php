@@ -28,6 +28,8 @@ class Config
         $base_abs = $here . '/' . $base;
         
         $files = Fs::scan($base_abs);
+        if(!$files)
+            return;
         
         foreach($files as $file){
             $file_abs  = $base_abs . '/' . $file;

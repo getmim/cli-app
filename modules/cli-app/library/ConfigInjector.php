@@ -54,41 +54,6 @@ class ConfigInjector
         return $class::$method();
     }
     
-    private static function injectConfigs(array &$config, array $items, int $space=0): void{
-        $next_space = $space + 2;
-        foreach($items as $item){
-            $children = $item['children'] ?? null;
-            $name = $item['name'];
-            $loop = true;
-            
-            while($loop){
-                $used_name = $name;
-                if(is_array($name))
-                    $used_name = self::askInput($name, $space);
-                else
-                    $loop = false;
-                if(!$used_name)
-                    break;
-                
-                $value = [];
-                
-                if(!$children)
-                    $value = self::askInput($item, $space);
-                $config[$used_name] = $value;
-                
-                if($children){
-                    if(isset($item['question'])){
-                        $question = $item['question'];
-                        Bash::echo($question, $space);
-                    }
-                    self::injectConfigs($config[$used_name], $children, $next_space);
-                    if($config[$used_name] === [])
-                        unset($config[$used_name]);
-                }
-            }
-        }
-    }
-    
     private static function scanForNew(array $config, array $inject): array{
         $result = [];
         
@@ -189,6 +154,41 @@ class ConfigInjector
         }
         
         return $result;
+    }
+    
+    static function injectConfigs(array &$config, array $items, int $space=0): void{
+        $next_space = $space + 2;
+        foreach($items as $item){
+            $children = $item['children'] ?? null;
+            $name = $item['name'];
+            $loop = true;
+            
+            while($loop){
+                $used_name = $name;
+                if(is_array($name))
+                    $used_name = self::askInput($name, $space);
+                else
+                    $loop = false;
+                if(!$used_name)
+                    break;
+                
+                $value = [];
+                
+                if(!$children)
+                    $value = self::askInput($item, $space);
+                $config[$used_name] = $value;
+                
+                if($children){
+                    if(isset($item['question'])){
+                        $question = $item['question'];
+                        Bash::echo($question, $space);
+                    }
+                    self::injectConfigs($config[$used_name], $children, $next_space);
+                    if($config[$used_name] === [])
+                        unset($config[$used_name]);
+                }
+            }
+        }
     }
     
     static function inject(string $file, array $config): void{
