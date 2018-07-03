@@ -302,9 +302,15 @@ class Config
                     $conf->path->value = $combined_path;
                     
                     $conf->path = self::_reqPath($configs, $conf->path, $gate, false);
+
+                    if($sep === '/'){
+                        if(!isset($conf->method))
+                            $conf->method = 'GET';
+                        $conf->_method = explode('|', $conf->method);
+                    }
                     
                     $conf = self::_reqHandler($conf, $gate);
-                    
+
                     $gate_routes[$rname] = $conf;
                 }
                 
