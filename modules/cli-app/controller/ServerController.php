@@ -29,7 +29,8 @@ class ServerController extends \CliApp\Controller
             'test' => 0,
             'info' => 0
         ];
-        
+        $autoload_classes = $config->autoload->classes;
+
         foreach($servers as $module => $tests){
             $mod_len = strlen($module);
             if($mod_len > $length->module)
@@ -48,6 +49,11 @@ class ServerController extends \CliApp\Controller
                     $class = $handler->class;
                     $method= $handler->method;
                 }
+
+                if(!isset($autoload_classes->$class))
+                    Bash::error('Class `' . $class . '` not registered.');
+
+                require_once $here . '/' . $autoload_classes->$class;
                 
                 $res = $class::$method();
                 $info_len = strlen($res['info']);
