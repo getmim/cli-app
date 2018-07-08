@@ -130,10 +130,22 @@ class ModuleController extends \CliApp\Controller
             Bash::error('No module to process');
         
         $here = getcwd();
+        $ask = true;
+        
+        if(count($modules) > 1){
+            $ask_conf = [
+                'text' => 'Are you sure want to remove all selected modules?',
+                'type' => 'bool',
+                'default' => false
+            ];
+
+            if(Bash::ask($ask_conf))
+                $ask = false;
+        }
         
         // remove all selected modules
         foreach($modules as $name => $uri){
-            if(!Module::remove($here, $name))
+            if(!Module::remove($here, $name, $ask))
                 return;
         }
         

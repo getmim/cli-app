@@ -261,9 +261,30 @@ class Module
             return false;
         }
         
+        self::removeModuleDb($here, $module_config['__name']);
         unlink($unremoval);
         
         return true;
+    }
+
+    static function removeModuleDb(string $here, string $name): void{
+        $nl = PHP_EOL;
+        $app_modules_file = $here . '/etc/modules.php';
+        $app_modules = [];
+        if(is_file($app_modules_file))
+            $app_modules = include $app_modules_file;
+
+        if(isset($app_modules[$name]))
+            unset($app_modules[$name]);
+
+        $source = to_source($app_modules);
+        $tx = '<?php' . $nl;
+        $tx.= '/* GENERATE BY CLI */' . $nl;
+        $tx.= '/* DON\'T MODIFY */' . $nl;
+        $tx.= $nl;
+        $tx.= 'return ' . $source . ';';
+        
+        Fs::write($app_modules_file, $tx);
     }
     
     static function update(string $here, string $module, string $uri=null): bool{
