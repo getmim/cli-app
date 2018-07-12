@@ -222,15 +222,21 @@ class Config
             $routes = $configs->routes ?? (object)[];
             
             foreach($configs->gates as $name => $conf){
+                if(!isset($conf->asset))
+                    $conf->asset = (object)['host' => $conf->host->value];
+                if(strstr($conf->asset->host, 'HOST'))
+                    $conf->asset->host = str_replace('HOST', $configs->host, $conf->asset->host);
+
                 $res = (object)[
-                    'name' => $name,
-                    'priority' => $conf->priority ?? 1000,
-                    'host' => self::_reqHost($configs, $conf->host),
-                    'path' => self::_reqPath($configs, $conf->path, $conf, true),
+                    'name'      => $name,
+                    'priority'  => $conf->priority ?? 1000,
+                    'host'      => self::_reqHost($configs, $conf->host),
+                    'path'      => self::_reqPath($configs, $conf->path, $conf, true),
+                    'asset'     => $conf->asset,
                     'middlewares' => $conf->middlewares ?? (object)[],
-                    'errors' => (object)[]
+                    'errors'    => (object)[]
                 ];
-                
+
                 if(isset($routes->$name)){
                     // 404
                     if(isset($routes->$name->{'404'})){
@@ -242,6 +248,7 @@ class Config
                         $res->errors->{'500'} = self::_reqHandler($routes->$name->{'500'}, $conf);
                     }
                 }
+                
                 $result[] = $res;
             }
             
