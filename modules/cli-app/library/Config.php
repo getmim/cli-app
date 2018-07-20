@@ -155,8 +155,10 @@ class Config
             return $result;
 
         $result->_type = 'regex';
+
+        $is_cli = $gate->host->value === 'CLI';
         
-        if($gate->host->value !== 'CLI')
+        if(!$is_cli)
             $regex = '!^' . str_replace('/', '\\/', $result->value) . ($rest?'((\/.*))*':'') . '$!';
         else
             $regex = '!^' . $result->value . ($rest?'(( .*))*':'') . '$!';
@@ -172,7 +174,8 @@ class Config
             }else{
                 switch($type){
                 case 'any':
-                    $rval.= '[^\.]+';
+                    $sign = $is_cli ? ' ' : '/';
+                    $rval.= '[^' . $sign . ']+';
                     break;
                 case 'slug':
                     $rval.= '[A-Za-z0-9_-]+';
