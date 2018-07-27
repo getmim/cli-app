@@ -123,30 +123,30 @@ return [
     ],
 
     'cli' => [
-    	'autocomplete' => [
-    		'!^app (install|remove|update)( .*)?$!' => [
-    			'priority' => 5,
-    			'handler' => [
+        'autocomplete' => [
+            '!^app (install|remove|update)( .*)?$!' => [
+                'priority' => 5,
+                'handler' => [
                     'class' => 'CliApp\\Library\\Autocomplete',
                     'method' => 'module'
                 ]
-    		],
+            ],
 
-    		'!^app (config|init|module|server)$!' => [
-    			'priority' => 4,
-    			'handler' => [
+            '!^app (config|init|module|server)$!' => [
+                'priority' => 4,
+                'handler' => [
                     'class' => 'CliApp\\Library\\Autocomplete',
                     'method' => 'none'
                 ]
-    		],
+            ],
 
-    		'!^app( [a-z]*)?$!' => [
-    			'priority' => 3,
-    			'handler' => [
+            '!^app( [a-z]*)?$!' => [
+                'priority' => 3,
+                'handler' => [
                     'class' => 'CliApp\\Library\\Autocomplete',
                     'method' => 'command'
                 ]
-    		]
-    	]
+            ]
+        ]
     ]
 ];
