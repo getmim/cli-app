@@ -151,6 +151,33 @@ class Module
         }
     }
     
+    static function isAppBase(string $here): bool{
+        // should has this folders
+        $dirs = [
+            'app',
+            'modules',
+            'etc'
+        ];
+        foreach($dirs as $dir){
+            if(!is_dir($here . '/' . $dir))
+                return false;
+        }
+        
+        // should has this files
+        $files = [
+            'index.php',
+            'etc/.env',
+            'etc/modules.php',
+            'etc/config/main.php'
+        ];
+        foreach($files as $file){
+            if(!is_file($here . '/' . $file))
+                return false;
+        }
+        
+        return true;
+    }
+    
     static function isModuleBase(string $here): bool{
         // module should has `modules/name` dir
         $mod_dir = $here . '/modules';

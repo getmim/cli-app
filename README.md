@@ -10,11 +10,11 @@ Di bawah ini adalah perintah-perintah yang dilayani oleh module ini:
 ```
 mim app init
 mim app config
-mim app install [module[ module[ ...]]] | -
+mim app install (module[ ...]) | -
 mim app module
-mim app remove [module[ module[ ...]]] | -
+mim app remove (module[ ...]) | -
 mim app server
-mim app update [module[ module[ ...]]] | -
+mim app update (module[ ...]) | -
 ```
 
 Nilai `-` pada perintah `install`, `update`, dan `remove` berarti melakukan aksi
