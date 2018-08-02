@@ -207,6 +207,7 @@ class Config
         foreach($config->autoload->classes as $ns => $conf){
             switch($conf->type){
             case 'file':
+            case 'psr4':
                 self::_autoloadFile($result, $ns, $conf, $here);
                 break;
             default:
