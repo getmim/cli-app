@@ -148,5 +148,11 @@ return [
                 ]
             ]
         ]
+    ],
+
+    'cliApp' => [
+        'callback' => [
+            'reconfig' => []
+        ]
     ]
 ];

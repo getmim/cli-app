@@ -20,3 +20,33 @@ mim app update (module[ ...]) | -
 Nilai `-` pada perintah `install`, `update`, dan `remove` berarti melakukan aksi
 tersebut ke semua module yang teridentifikasi. Contohnya, untuk meng-update semua
 module yang terinstall, jalankan perintah `mim app update -`.
+
+## Config Callback
+
+Masing-masing module boleh mendaftarkan callback yang akan dipanggil ketika
+konfigurasi aplikasi di regenerasi. Untuk mendaftarkan fungsi tersebut, silahkan
+tambahkan data seperti di bawah pada konfigurasi module:
+
+```php
+return [
+    'cliApp' => [
+        'callback' => [
+            'reconfig' => [
+                'Class::method' => true
+            ]
+        ]
+    ]
+];
+```
+Fungsi `Class::method` akan di panggil dengan parameter config yang sudah terbentuk.
+
+```php
+Class{
+    static function(object &$config, string $base): void{
+
+    }
+}
+```
+
+Class handler harus bisa berdiri sendiri karena fungsi ini akan di panggil didalam
+scope cli, dan bukan scope aplikasi.

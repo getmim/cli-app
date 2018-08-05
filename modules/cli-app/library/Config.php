@@ -12,6 +12,9 @@ use Cli\Library\Bash;
 
 class Config
 {
+
+    private static $app_autoload;
+
     private static function _autoloadFile(object &$target, string $ns, object $conf, string $here): void{
         $base_abs = $here . '/' . $conf->base;
         
@@ -197,6 +200,11 @@ class Config
         
         return $result;
     }
+
+    private static function _loadAppClass(string $name): void{
+        if(isset(self::$app_autoload->classes->$name))
+            require_once self::$app_autoload->classes->$name;
+    }
     
     private static function _parseAutoload(object &$config, string $here): void{
         $result = (object)[
@@ -215,7 +223,23 @@ class Config
             }
         }
         
+        self::$app_autoload = $result;
         $config->autoload = $result;
+    }
+
+    private static function _parseCallback(object &$configs, string $here): void{
+        if(!isset($configs->cliApp->callback->reconfig))
+            return;
+        $callbacks = $configs->cliApp->callback->reconfig;
+        foreach($callbacks as $cb => $cond){
+            if(!$cond)
+                continue;
+            $hdr = explode('::', $cb);
+            $cls = $hdr[0];
+            $mth = $hdr[1];
+            self::_loadAppClass($cls);
+            $cls::$mth($configs, $here);
+        }
     }
     
     private static function _parseGates(object &$configs, string $here): void{
@@ -391,6 +415,7 @@ class Config
         self::_parseAutoload($configs, $here);
         self::_parseGates($configs, $here);
         self::_parseRoutes($configs, $here);
+        self::_parseCallback($configs, $here);
         
         $source = to_source($configs);
         
