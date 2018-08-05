@@ -228,9 +228,9 @@ class Config
     }
 
     private static function _parseCallback(object &$configs, string $here): void{
-        if(!isset($configs->cliApp->callback->reconfig))
+        if(!isset($configs->callback->app->reconfig))
             return;
-        $callbacks = $configs->cliApp->callback->reconfig;
+        $callbacks = $configs->callback->app->reconfig;
         foreach($callbacks as $cb => $cond){
             if(!$cond)
                 continue;

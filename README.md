@@ -29,9 +29,9 @@ tambahkan data seperti di bawah pada konfigurasi module:
 
 ```php
 return [
-    'cliApp' => [
-        'callback' => [
-            'reconfig' => [
+    'callback' => [
+        'app' => [
+            'config' => [
                 'Class::method' => true
             ]
         ]
