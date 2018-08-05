@@ -201,9 +201,9 @@ class Config
         return $result;
     }
 
-    private static function _loadAppClass(string $name): void{
+    private static function _loadAppClass(string $name, string $here): void{
         if(isset(self::$app_autoload->classes->$name))
-            require_once self::$app_autoload->classes->$name;
+            require_once $here . '/' . self::$app_autoload->classes->$name;
     }
     
     private static function _parseAutoload(object &$config, string $here): void{
@@ -237,7 +237,7 @@ class Config
             $hdr = explode('::', $cb);
             $cls = $hdr[0];
             $mth = $hdr[1];
-            self::_loadAppClass($cls);
+            self::_loadAppClass($cls, $here);
             $cls::$mth($configs, $here);
         }
     }
