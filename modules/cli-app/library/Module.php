@@ -101,53 +101,99 @@ class Module
     }
     
     static function installDependencies(string $here, array $devs): void{
+        $composer_installed = false;
         foreach($devs as $type => $modules){
-            foreach($modules as $mods){
-                $mods_len = count($mods);
-                
-                if($mods_len === 1){
-                    foreach($mods as $mod_name => $mod_uri);
-                    
-                    $ask_conf = [
-                        'text' => 'Module `' . $mod_name . '` is optional. Would you like to install it?',
-                        'type' => 'bool',
-                        'default' => true
-                    ];
-                    
-                    $mod_int_conf_file = $here . '/modules/' . $mod_name . '/config.php';
-                    $mod_exists = is_file($mod_int_conf_file);
-                    
-                    if(!$mod_exists && ($type === 'required' || Bash::ask($ask_conf)))
-                        self::install($here, $mod_name, $mod_uri);
-                }else{
-                    $ask_conf = [
-                        'text' => 'One of below modules is optionally to be installed. Please select one',
-                        'options' => [ 0 => '(none)' ]
-                    ];
-                    
-                    if($type === 'required'){
-                        $ask_conf = [
-                            'text' => 'One of below modules is need to be installed. Please select one',
-                            'options' => []
-                        ];
+            if($type === 'composer'){
+                foreach($modules as $name => $version){
+                    $cmd = 'cd "'.$here.'" && composer --format=json show';
+                    $result = [];
+                    exec($cmd, $result, $rval);
+
+                    $install = true;
+                    if(!$rval){
+                        $data = json_decode(implode(' ', $result));
+                        if($data && isset($data->installed)){
+                            foreach($data->installed as $imd){
+                                if($imd->name == $name){
+                                    $install = false;
+                                    break;
+                                }
+                            }
+                        }
                     }
-                    
-                    foreach($mods as $mod_name => $mod_uri){
-                        $mod_int_conf_file = $here . '/modules/' . $mod_name . '/config.php';
-                        if(is_file($mod_int_conf_file))
-                            continue 2;
-                        $ask_conf['options'][] = $mod_name;
-                    }
-                    
-                    $picked = (int)Bash::ask($ask_conf);
-                    $mod_name = $ask_conf['options'][$picked];
-                    
-                    if($mod_name === '(none)')
+
+                    if(!$install)
                         continue;
-                    $mod_uri  = $mods[$mod_name];
-                    self::install($here, $mod_name, $mod_uri);
+
+                    $composer_installed = true;
+
+                    // let install the module
+                    $rname = $name;
+                    if($version)
+                        $rname.= ':' . $version;
+                    $cmd = 'cd "' . $here . '" && composer require ' . $rname;
+
+                    Bash::echo('Installing composer `' . $rname . '`');
+                    exec($cmd);
+                }
+            }elseif(in_array($type, ['optional', 'required'])){
+                foreach($modules as $mods){
+                    $mods_len = count($mods);
+                    
+                    if($mods_len === 1){
+                        foreach($mods as $mod_name => $mod_uri);
+                        
+                        $ask_conf = [
+                            'text' => 'Module `' . $mod_name . '` is optional. Would you like to install it?',
+                            'type' => 'bool',
+                            'default' => true
+                        ];
+                        
+                        $mod_int_conf_file = $here . '/modules/' . $mod_name . '/config.php';
+                        $mod_exists = is_file($mod_int_conf_file);
+                        
+                        if(!$mod_exists && ($type === 'required' || Bash::ask($ask_conf)))
+                            self::install($here, $mod_name, $mod_uri);
+                    }else{
+                        $ask_conf = [
+                            'text' => 'One of below modules is optionally to be installed. Please select one',
+                            'options' => [ 0 => '(none)' ]
+                        ];
+                        
+                        if($type === 'required'){
+                            $ask_conf = [
+                                'text' => 'One of below modules is need to be installed. Please select one',
+                                'options' => []
+                            ];
+                        }
+                        
+                        foreach($mods as $mod_name => $mod_uri){
+                            $mod_int_conf_file = $here . '/modules/' . $mod_name . '/config.php';
+                            if(is_file($mod_int_conf_file))
+                                continue 2;
+                            $ask_conf['options'][] = $mod_name;
+                        }
+                        
+                        $picked = (int)Bash::ask($ask_conf);
+                        $mod_name = $ask_conf['options'][$picked];
+                        
+                        if($mod_name === '(none)')
+                            continue;
+                        $mod_uri  = $mods[$mod_name];
+                        self::install($here, $mod_name, $mod_uri);
+                    }
                 }
             }
+        }
+
+        // let optimize the composer
+        if($composer_installed){
+            Bash::echo('Optimize composer autoload');
+
+            $cmd = 'cd "' . $here . '"'
+                 . ' && composer dump-autoload -o'
+                 . ' && composer dump-autoload -a';
+            exec($cmd);
         }
     }
     
