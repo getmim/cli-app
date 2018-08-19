@@ -15,8 +15,19 @@ class Autocomplete extends \Cli\Autocomplete
     
     static function command(array $args): string{
         $farg = $args[1] ?? null;
-        $result = ['config', 'init', 'install', 'module', 'remove', 'server', 'update'];
 
+        $routes = include BASEPATH . '/etc/cache/routes.php';
+        
+        $result = [];
+
+        foreach($routes->{'tool-app'} as $route){
+            $bpath = explode(' ', trim($route->path->value));
+            if(!isset($bpath[1]))
+                continue;
+            if(!in_array($bpath[1], $result))
+                $result[] = $bpath[1];
+        }
+        
         if(!$farg)
             return trim(implode(' ', $result));
 
