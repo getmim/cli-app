@@ -330,7 +330,7 @@ class Config
             }
             
             usort($result, function($a, $b){
-                return $a->priority - $b->priority;
+                return $b->priority - $a->priority;
             });
         }
         
