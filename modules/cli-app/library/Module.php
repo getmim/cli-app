@@ -17,6 +17,7 @@ use Mim\Library\Fs;
 
 class Module
 {
+    private static $skipInstallModules = [];
 
     static function addGitIgnoreDb(string $here, array $config): void{
         $nl = PHP_EOL;
@@ -136,6 +137,7 @@ class Module
                     Bash::echo('Installing composer `' . $rname . '`');
                     exec($cmd);
                 }
+
             }elseif(in_array($type, ['optional', 'required'])){
                 foreach($modules as $mods){
                     $mods_len = count($mods);
@@ -151,9 +153,21 @@ class Module
                         
                         $mod_int_conf_file = $here . '/modules/' . $mod_name . '/config.php';
                         $mod_exists = is_file($mod_int_conf_file);
-                        
-                        if(!$mod_exists && ($type === 'required' || Bash::ask($ask_conf)))
-                            self::install($here, $mod_name, $mod_uri);
+
+                        if(!$mod_exists){
+                            $install_it = $type === 'required';
+                            if(!$install_it){
+                                if(!in_array($mod_name, self::$skipInstallModules)){
+                                    $install_it = Bash::ask($ask_conf);
+                                    if(!$install_it)
+                                        self::$skipInstallModules[] = $mod_name;
+                                }
+                            }
+
+                            if($install_it)
+                                self::install($here, $mod_name, $mod_uri);
+                        }
+                            
                     }else{
                         $ask_conf = [
                             'text' => 'One of below modules is optionally to be installed. Please select one',
@@ -171,14 +185,24 @@ class Module
                             $mod_int_conf_file = $here . '/modules/' . $mod_name . '/config.php';
                             if(is_file($mod_int_conf_file))
                                 continue 2;
-                            $ask_conf['options'][] = $mod_name;
+                            if(!in_array($mod_name, self::$skipInstallModules))
+                                $ask_conf['options'][] = $mod_name;
                         }
                         
+                        if(count($ask_conf['options']) === 1)
+                            continue;
+
                         $picked = (int)Bash::ask($ask_conf);
                         $mod_name = $ask_conf['options'][$picked];
                         
-                        if($mod_name === '(none)')
+                        if($mod_name === '(none)'){
+                            foreach($ask_conf['options'] as $idx => $mod_name){
+                                if($idx)
+                                    self::$skipInstallModules[] = $mod_name;
+                            }
                             continue;
+                        }
+                        
                         $mod_uri  = $mods[$mod_name];
                         self::install($here, $mod_name, $mod_uri);
                     }
