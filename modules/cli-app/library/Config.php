@@ -277,15 +277,37 @@ class Config
     }
 
     private static function _parseCallback(object &$configs, string $here): void{
+        if(!isset($configs->callback))
+            return;
+        
+        foreach($configs->callback as $module => &$modules){
+            foreach($modules as $event => &$events){
+                $new_events = [];
+                foreach($events as $handler => $cond){
+                    if(!$cond)
+                        continue;
+                    
+                    $handler = explode('::', $handler);
+                    $class  = $handler[0];
+                    $method = $handler[1];
+                    
+                    $new_events[] = (object)[
+                        'class' => $class,
+                        'method' => $method 
+                    ];
+                }
+                $events = $new_events;
+            }
+        }
+        unset($events);
+
         if(!isset($configs->callback->app->reconfig))
             return;
+
         $callbacks = $configs->callback->app->reconfig;
-        foreach($callbacks as $cb => $cond){
-            if(!$cond)
-                continue;
-            $hdr = explode('::', $cb);
-            $cls = $hdr[0];
-            $mth = $hdr[1];
+        foreach($callbacks as $callback){
+            $cls = $callback->class;
+            $mth = $callback->method;
             self::_loadAppClass($cls, $here);
             $cls::$mth($configs, $here);
         }
