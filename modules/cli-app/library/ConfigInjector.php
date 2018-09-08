@@ -27,9 +27,21 @@ class ConfigInjector
             $askOpts['type'] = 'bool';
             $answer = Bash::ask($askOpts);
         }else{
-            if($options)
-                $askOpts['options'] = $options;
+            if($options){
+                $used_options   = [];
+                $last_index     = 0;
+                $used_opt_value = [];
+                foreach($options as $key => $val){
+                    $used_options[++$last_index] = $val;
+                    $used_opt_value[$last_index] = $key;
+                }
+                $askOpts['options'] = $used_options;
+            }
+
             $answer = Bash::ask($askOpts);
+
+            if($options)
+                $answer = $used_opt_value[$answer];
         }
             
         $valid = self::validateInput($answer, $config);
