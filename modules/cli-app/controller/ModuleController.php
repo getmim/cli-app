@@ -17,16 +17,18 @@ class ModuleController extends \CliApp\Controller
 {
     private function filterArgModules(array $modules): array{
         $result = [];
+
+        $module_db_file = getcwd() . '/etc/modules.php';
+        if(!is_file($module_db_file))
+            Bash::error('Please run the command under exists application');
+        $module_db = include $module_db_file;
+        
         foreach($modules as $module){
             if($module === '-'){
-                $module_db_file = getcwd() . '/etc/modules.php';
-                if(!is_file($module_db_file))
-                    Bash::error('Please run the command under exists application');
-                $module_db = include $module_db_file;
                 foreach($module_db as $name => $uri)
                     $result[$name] = $uri;
             }else{
-                $result[$module] = null;
+                $result[$module] = $module_db[$module] ?? null;
             }
         }
         
