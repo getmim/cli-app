@@ -101,7 +101,7 @@ class Module
         Fs::write($app_modules_file, $tx);
     }
     
-    static function installDependencies(string $here, array $devs): void{
+    static function installDependencies(string $here, array $devs, bool $ignore_dev=false): void{
         $composer_installed = false;
         foreach($devs as $type => $modules){
             if($type === 'composer'){
@@ -141,6 +141,9 @@ class Module
             }elseif(in_array($type, ['optional', 'required'])){
                 foreach($modules as $mods){
                     $mods_len = count($mods);
+
+                    if($ignore_dev && $type === 'optional')
+                        continue;
                     
                     if($mods_len === 1){
                         foreach($mods as $mod_name => $mod_uri);
@@ -283,7 +286,7 @@ class Module
         return true;
     }
     
-    static function install(string $here, string $module, string $uri=null): bool{
+    static function install(string $here, string $module, string $uri=null, bool $ignore_dev=false): bool{
         Bash::echo('Installing module `' . $module . '`');
         
         // downloading the module
@@ -321,7 +324,7 @@ class Module
         
         // Install dependencies (req/opt)
         if(isset($temp->config['__dependencies']))
-            self::installDependencies($here, $temp->config['__dependencies']);
+            self::installDependencies($here, $temp->config['__dependencies'], $ignore_dev);
         
         // Remove the tmp files
         Fs::rmdir($temp->base);
@@ -384,7 +387,7 @@ class Module
         Fs::write($app_modules_file, $tx);
     }
     
-    static function update(string $here, string $module, string $uri=null): bool{
+    static function update(string $here, string $module, string $uri=null, bool $ignore_dev=false): bool{
         Bash::echo('Updating module `' . $module . '`');
         
         // downloading the module
@@ -419,7 +422,7 @@ class Module
         
         // Install dependencies (req/opt)
         if(isset($temp->config['__dependencies']))
-            self::installDependencies($here, $temp->config['__dependencies']);
+            self::installDependencies($here, $temp->config['__dependencies'], $ignore_dev);
         
         // Remove the tmp files
         Fs::rmdir($temp->base);

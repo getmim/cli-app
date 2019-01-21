@@ -78,6 +78,10 @@ class ModuleController extends \CliApp\Controller
         $modules = $this->filterArgModules($this->req->param->modules);
         if(!$modules)
             Bash::error('No module to process');
+
+        $ignore_dev = false;
+        if($this->req->param->modules && $this->req->param->modules[0] === '-')
+            $ignore_dev = true;
         
         $here = getcwd();
         
@@ -93,7 +97,7 @@ class ModuleController extends \CliApp\Controller
                 continue;
             }
             
-            if(!Module::install($here, $name, $uri))
+            if(!Module::install($here, $name, $uri, $ignore_dev))
                 return;
         }
         
@@ -106,7 +110,11 @@ class ModuleController extends \CliApp\Controller
         $modules = $this->filterArgModules($this->req->param->modules);
         if(!$modules)
             Bash::error('No module to process');
-        
+
+        $ignore_dev = false;
+        if($this->req->param->modules && $this->req->param->modules[0] === '-')
+            $ignore_dev = true;
+
         $here = getcwd();
         
         // update all selected modules
@@ -117,7 +125,7 @@ class ModuleController extends \CliApp\Controller
                 continue;
             }
             
-            if(!Module::update($here, $name, $uri))
+            if(!Module::update($here, $name, $uri, $ignore_dev))
                 return;
         }
         
