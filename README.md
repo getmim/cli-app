@@ -10,6 +10,7 @@ Di bawah ini adalah perintah-perintah yang dilayani oleh module ini:
 ```
 mim app init
 mim app config
+mim app gitignore
 mim app install (module[ ...]) | -
 mim app module
 mim app remove (module[ ...]) | -

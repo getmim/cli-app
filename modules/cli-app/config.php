@@ -7,7 +7,7 @@
 
 return [
     '__name' => 'cli-app',
-    '__version' => '0.0.9',
+    '__version' => '0.0.10',
     '__git' => 'git@github.com:getphun/cli-app.git',
     '__license' => 'MIT',
     '__author' => [
@@ -73,6 +73,14 @@ return [
                     'value' => 'init'
                 ],
                 'handler' => 'CliApp\\Controller\\Application::init'
+            ],
+            
+            'toolAppGitIgnore' => [
+                'info' => 'Create or regenerate application gitignore file',
+                'path' => [
+                    'value' => 'gitignore'
+                ],
+                'handler' => 'CliApp\\Controller\\Application::gitignore'
             ],
             
             'toolAppModuleIndex' => [

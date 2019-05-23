@@ -438,23 +438,21 @@ class Config
         
         Fs::write($here . '/etc/cache/routes.php', $tx);
     }
-    
-    static function init(string $here): void{
-        $nl = PHP_EOL;
-        
+
+    static function fetch(string $here): ?object{
         $module_dir = $here . '/modules';
         if(!is_dir($module_dir))
-            return;
-        
+            return null;
+
         $app_config_file = $here . '/etc/config/main.php';
         if(!is_file($app_config_file))
-            return;
-        
+            return null;
+
         $configs = [[
             '_modules' => []
         ]];
         $modules = Fs::scan($module_dir);
-        
+
         foreach($modules as $mod){
             $mod_path = $module_dir . '/' . $mod;
             if(!is_dir($mod_path))
@@ -465,7 +463,7 @@ class Config
             $mod_conf = include $mod_conf_file;
             $mod_conf_filtered = [];
             foreach($mod_conf as $cname => $cval){
-                if(substr($cname, 0, 2) == '__')
+                if(substr($cname,0,2) === '__')
                     continue;
                 $mod_conf_filtered[$cname] = $cval;
             }
@@ -473,21 +471,33 @@ class Config
             
             $configs[0]['_modules'][] = $mod;
         }
-        
+
         $configs[] = include $app_config_file;
         $env = file_get_contents($here . '/etc/.env');
         $env_config_file = $here . '/etc/config/' . $env . '.php';
         if(is_file($env_config_file))
             $configs[] = include $env_config_file;
-        
+
         $configs = array_replace_recursive(...$configs);
         $configs = objectify($configs);
+
+        return $configs;
+    }
+    
+    static function init(string $here): void{
+        $nl = PHP_EOL;
         
+        $configs = self::fetch($here);
+        if(!$configs)
+            return;
+
         self::_parseAutoload($configs, $here);
         self::_parseGates($configs, $here);
         self::_parseRoutes($configs, $here);
         self::_parseCallback($configs, $here);
         
+        if(isset($configs->__gitignore))
+            unset($configs->__gitignore);
         $source = to_source($configs);
         
         $tx = '<?php' . $nl;
