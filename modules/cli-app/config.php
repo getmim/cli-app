@@ -7,7 +7,7 @@
 
 return [
     '__name' => 'cli-app',
-    '__version' => '0.0.9',
+    '__version' => '0.0.10',
     '__git' => 'git@github.com:getphun/cli-app.git',
     '__license' => 'MIT',
     '__author' => [

@@ -12,6 +12,19 @@ use Cli\Library\Bash;
 
 class ConfigInjector
 {
+    private static $module_autoloads = [];
+
+    private static function _loadAppClass(string $name): void{
+        if(isset(self::$module_autoloads->classes->$name))
+            require_once getcwd() . '/' . self::$module_autoloads->classes->$name;
+    }
+
+    private static function moduleAutoload(array $configs): void{
+        $configs = objectify($configs);
+        $result = AutoloadParser::parse($configs, getcwd());
+        self::$module_autoloads = $result;
+    }
+
     private static function askInput(array $config, int $space=0){
         $options = $config['options'] ?? [];
         
@@ -62,6 +75,9 @@ class ConfigInjector
         
         $class = $config['default']['class'];
         $method= $config['default']['method'];
+
+        if(!class_exists($class, false))
+            self::_loadAppClass($class);
         
         return $class::$method();
     }
@@ -135,6 +151,8 @@ class ConfigInjector
         if(is_array($rule)){
             $class = $rule['class'];
             $method= $rule['method'];
+            if(!class_exists($class, false))
+                self::_loadAppClass($class);
             $result = $class::$method($input);
         }else{
             switch($rule){
@@ -174,6 +192,7 @@ class ConfigInjector
             $children = $item['children'] ?? null;
             $name = $item['name'];
             $loop = true;
+            $injector = $item['injector'] ?? null;
             
             while($loop){
                 $used_name = $name;
@@ -186,8 +205,18 @@ class ConfigInjector
                 
                 $value = [];
                 
-                if(!$children)
+                if(!$children){
                     $value = self::askInput($item, $space);
+                    if($injector){
+                        $class = $injector['class'];
+                        $method= $injector['method'];
+                        if(!class_exists($class, false))
+                            self::_loadAppClass($class);
+                        $value = $class::$method($config, $value);
+                        if(is_null($value))
+                            continue;
+                    }
+                }
                 $config[$used_name] = $value;
                 
                 if($children){
@@ -212,6 +241,8 @@ class ConfigInjector
             Bash::error('Application config file not found');
             return;
         }
+
+        self::moduleAutoload($config);
         
         $app_config = include $file;
         
