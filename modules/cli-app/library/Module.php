@@ -20,62 +20,7 @@ class Module
     private static $skipInstallModules = [];
 
     static function addGitIgnoreDb(string $here, array $config): void{
-        $nl = PHP_EOL;
-        if(!isset($config['__gitignore']))
-            return;
-        
-        $mod_ignores = $config['__gitignore'];
-        $app_ignores = [];
-        
-        $all_ignores = [];
-        
-        $app_ignore_file = $here . '/.gitignore';
-        if(is_file($app_ignore_file)){
-            $dump_ignores = file_get_contents($app_ignore_file);
-            $ignores = explode($nl, $dump_ignores);
-            $last_parent = 'global';
-            
-            foreach($ignores as $line){
-                $line = trim($line);
-                if(!$line)
-                    continue;
-                if(substr($line, 0, 2) === '##'){
-                    $last_parent = trim(substr($line, 2));
-                    $app_ignores[$last_parent] = [];
-                    continue;
-                }
-                
-                $cond = substr($line, 0, 1) !== '#';
-                if(!$cond)
-                    $line = trim(substr($line, 1));
-                if(!in_array($line, $app_ignores[$last_parent]))
-                    $app_ignores[$last_parent][] = $line;
-                $all_ignores[$line] = $cond;
-            }
-        }
-        
-        $parent = $config['__name'];
-        if(!isset($app_ignores[$parent]))
-            $app_ignores[$parent] = [];
-        foreach($mod_ignores as $line => $cond){
-            $all_ignores[$line] = $cond;
-            if(!in_array($line, $app_ignores[$parent]))
-                $app_ignores[$parent][] = $line;
-        }
-        
-        $tx = '';
-        foreach($app_ignores as $parent => $lines){
-            if($tx)
-                $tx.= $nl;
-            $tx.= '## ' . $parent . $nl;
-            foreach($lines as $line){
-                if(!$all_ignores[$line])
-                    $line = '# ' . $line;
-                $tx.= $line . $nl;
-            }
-        }
-        
-        Fs::write($app_ignore_file, $tx);
+        self::regenerateGitIgnoreDb($here);
     }
     
     static function addModuleDb(string $here, object $temp): void{
@@ -332,6 +277,87 @@ class Module
         
         return true;
     }
+
+    static function regenerateGitIgnoreDb(string $here): bool{
+        $app_ignore_file = $here . '/.gitignore';
+        if(is_file($app_ignore_file))
+            unlink($app_ignore_file);
+
+        $module_dir = $here . '/modules';
+        if(!is_dir($module_dir))
+            return false;
+
+        $app_config_file = $here . '/etc/config/main.php';
+        if(!is_file($app_config_file))
+            return false;
+
+        $modules = Fs::scan($module_dir);
+
+        $gitignores = [];
+        $ignorelines= [];
+
+        foreach($modules as $mod){
+            $mod_path = $module_dir . '/' . $mod;
+            if(!is_dir($mod_path))
+                continue;
+            
+            $mod_conf_file = $mod_path . '/config.php';
+            if(!is_file($mod_conf_file))
+                Bash::error('Module `' . $mod . '` has no config file');
+
+            $mod_conf = include $mod_conf_file;
+            $mod_conf_filtered = [];
+
+            $ignoreline = $mod_conf['__gitignore'] ?? [];
+
+            if(!$ignoreline)
+                continue;
+
+            $gitignores[$mod_conf['__name']] = $ignoreline;
+            $ignorelines = array_merge($ignorelines, $ignoreline);
+        }
+
+        $app_config = include $app_config_file;
+        if(isset($app_config['__gitignore'])){
+            $gitignores['global'] = $app_config['__gitignore'];
+            $ignorelines = array_merge($ignorelines, $app_config['__gitignore']);
+        }
+
+        $env = file_get_contents($here . '/etc/.env');
+        $env_config_file = $here . '/etc/config/' . $env . '.php';
+        if(is_file($env_config_file)){
+            $env_config = include $env_config_file;
+            if(isset($env_config['__gitignore'])){
+                $gitignores['global'] = $env_config['__gitignore'];
+                $ignorelines = array_merge($ignorelines, $env_config['__gitignore']);
+            }
+        }
+
+        $nl = PHP_EOL;
+        $tx = '';
+
+        foreach($gitignores as $parent => $lines){
+            $files = [];
+            foreach($lines as $file => $cond){
+                if(!$ignorelines[$file])
+                    continue;
+                $files[] = $file;
+            }
+
+            if(!$files)
+                continue;
+
+            if($tx)
+                $tx.= $nl;
+            $tx.= '# ' . $parent . $nl;
+            foreach($files as $file)
+                $tx.= $file .  $nl;
+        }
+
+        Fs::write($app_ignore_file, trim($tx));
+
+        return true;
+    }
     
     static function remove(string $here, string $module, bool $ask=true): bool{
         $module_conf_file = $here . '/modules/' . $module . '/config.php';
@@ -385,6 +411,9 @@ class Module
         $tx.= 'return ' . $source . ';';
         
         Fs::write($app_modules_file, $tx);
+
+        // Regenerate gitignore file
+        self::regenerateGitIgnoreDb($here);
     }
     
     static function update(string $here, string $module, string $uri=null, bool $ignore_dev=false): bool{

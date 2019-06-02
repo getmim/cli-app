@@ -27,4 +27,14 @@ class ApplicationController extends \CliApp\Controller
         
         Bash::echo('Blank application installed');
     }
+
+    public function gitignoreAction(){
+        $here = getcwd();
+        if(!$this->isAppBase($here))
+            Bash::error('Please run the command under exists application');
+
+        Module::regenerateGitIgnoreDb($here);
+
+        Bash::echo('GitIgnore file regenerated');
+    }
 }

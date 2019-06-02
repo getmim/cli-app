@@ -75,6 +75,14 @@ return [
                 'handler' => 'CliApp\\Controller\\Application::init'
             ],
             
+            'toolAppGitIgnore' => [
+                'info' => 'Create or regenerate application gitignore file',
+                'path' => [
+                    'value' => 'gitignore'
+                ],
+                'handler' => 'CliApp\\Controller\\Application::gitignore'
+            ],
+            
             'toolAppModuleIndex' => [
                 'info' => 'List of all modules under current application',
                 'path' => [
