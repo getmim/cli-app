@@ -94,7 +94,7 @@ class AutoloadParser
     static function parse(object $config, string $here): ?object{
         $result = (object)[
             'classes' => (object)[],
-            'files'   => $config->autoload->files
+            'files'   => $config->autoload->files ?? (object)[]
         ];
         
         foreach($config->autoload->classes as $ns => $conf){
