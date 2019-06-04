@@ -97,6 +97,11 @@ class ModuleController extends \CliApp\Controller
                 continue;
             }
             
+            if($uri === '~'){
+                Bash::echo('Module `' . $name . '` is local module. Skipping...');
+                continue;
+            }
+            
             if(!Module::install($here, $name, $uri, $ignore_dev))
                 return;
         }
@@ -125,6 +130,10 @@ class ModuleController extends \CliApp\Controller
                 continue;
             }
             
+            if($uri === '~'){
+                Bash::echo('Module `' . $name . '` is local module. Skipping...');
+                continue;
+            }
             if(!Module::update($here, $name, $uri, $ignore_dev))
                 return;
         }
