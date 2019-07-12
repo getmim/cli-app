@@ -259,7 +259,7 @@ class Module
         $module_conf_file = $here . '/etc/config/main.php';
         
         // inject application config
-        ConfigInjector::inject($module_conf_file, $temp->config);
+        ConfigInjector::inject($module_conf_file, $temp->config, $here);
         
         // Add current module to application modules
         self::addModuleDb($here, $temp);
@@ -444,7 +444,7 @@ class Module
         $module_conf_file = $here . '/etc/config/main.php';
         
         // inject application config
-        ConfigInjector::inject($module_conf_file, $temp->config);
+        ConfigInjector::inject($module_conf_file, $temp->config, $here);
         
         // Add gitignore
         self::addGitIgnoreDb($here, $temp->config);

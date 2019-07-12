@@ -13,15 +13,16 @@ use Cli\Library\Bash;
 class ConfigInjector
 {
     private static $module_autoloads = [];
+    private static $app_dir = '';
 
     private static function _loadAppClass(string $name): void{
         if(isset(self::$module_autoloads->classes->$name))
-            require_once getcwd() . '/' . self::$module_autoloads->classes->$name;
+            require_once self::$app_dir . '/' . self::$module_autoloads->classes->$name;
     }
 
     private static function moduleAutoload(array $configs): void{
         $configs = objectify($configs);
-        $result = AutoloadParser::parse($configs, getcwd());
+        $result = AutoloadParser::parse($configs, self::$app_dir);
         self::$module_autoloads = $result;
     }
 
@@ -232,7 +233,12 @@ class ConfigInjector
         }
     }
     
-    static function inject(string $file, array $config): void{
+    static function inject(string $file, array $config, string $target=''): void{
+        if(!$target)
+            $target = getcwd();
+
+        self::$app_dir = $target;
+
         $nl = PHP_EOL;
         if(!isset($config['__inject']))
             return;
