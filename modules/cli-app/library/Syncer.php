@@ -96,28 +96,34 @@ class Syncer
             return false;
         
         $module_files = self::scan($source, $target, $files, $rule);
-        
+
         foreach($module_files as $type => $conf){
             $source_base  = $conf['base'];
             $source_files = $conf['files'];
             $used_rule    = $type === 'source' ? $rule : 'obsolete';
             
             foreach($source_files as $file => $rules){
-                if(!in_array($used_rule, $rules))
-                    continue;
-                    
+                $target_file_abs = $target . '/' . $file;
                 $source_file_abs = $source_base . '/' . $file;
-                
-                if($used_rule === 'obsolete'){
+
+                $tmp_used_rule = $used_rule;
+
+                // new file created on update with `install` only rule
+                if(!is_file($target_file_abs))
+                    $tmp_used_rule = 'install';
+
+                if(!in_array($tmp_used_rule, $rules))
+                    continue;
+
+                if($tmp_used_rule === 'obsolete'){
                     if(is_file($source_file_abs)){
                         unlink($source_file_abs);
                         $source_file_abs = dirname($source_file_abs);
                     }
                     Fs::cleanUp($source_file_abs);
                 }else{
-                    $target_file_abs = $target . '/' . $file;
                     $copy = true;
-                    if($used_rule === 'install')
+                    if($tmp_used_rule === 'install')
                         $copy = !is_file($target_file_abs);
                     
                     if($copy)
