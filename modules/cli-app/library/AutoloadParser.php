@@ -59,15 +59,27 @@ class AutoloadParser
     }
 
     private static function _autoloadFilePSR4(object &$target, string $ns, object $conf, string $here): void{
-        $base_abs = $here . '/' . $conf->base;
-        
-        if(is_file($base_abs))
-            $target->classes->{$ns} = $conf->base;
-        elseif(is_dir($base_abs))
-            self::_autoloadFolderPSR4($target, $ns, $conf->base, $here);
-        
-        if(isset($conf->children))
-            self::_autoloadFolderPSR4($target, $ns, $conf->children, $here);
+        $conf_bases = $conf->base;
+
+        if(!is_array($conf_bases))
+            $conf_bases = [$conf_bases];
+
+        foreach($conf_bases as $conf_base){
+            $base_abs = $here . '/' . $conf_base;
+            
+            if(is_file($base_abs))
+                $target->classes->{$ns} = $conf_base;
+            elseif(is_dir($base_abs))
+                self::_autoloadFolderPSR4($target, $ns, $conf_base, $here);
+            
+            if(isset($conf->children)){
+                $conf_children = $conf->children;
+                if(!is_array($conf_children))
+                    $conf_children = [$conf_children];
+                foreach($conf_children as $conf_child)
+                    self::_autoloadFolderPSR4($target, $ns, $conf_child, $here);
+            }
+        }
     }
 
     private static function _autoloadFolderPSR4(object &$target, string $ns, string $base, string $here): void{
