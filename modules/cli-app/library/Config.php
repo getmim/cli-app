@@ -376,7 +376,7 @@ class Config
         }
 
         $configs[] = include $app_config_file;
-        $env = file_get_contents($here . '/etc/.env');
+        $env = trim(file_get_contents($here . '/etc/.env'));
         $env_config_file = $here . '/etc/config/' . $env . '.php';
         if(is_file($env_config_file))
             $configs[] = include $env_config_file;
