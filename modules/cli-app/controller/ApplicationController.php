@@ -16,6 +16,24 @@ use CliApp\Library\{
 
 class ApplicationController extends \CliApp\Controller
 {
+    public function envAction(){
+        $here = getcwd();
+        if(!$this->isAppBase($here))
+            Bash::error('Please run the command under exists application');
+
+        $target = trim($this->req->param->target);
+
+        $env_file = $here . '/etc/.env';
+        $f = fopen($env_file, 'w');
+        fwrite($f, $target);
+        fclose($f);
+
+        // now run reconfig
+        Config::init($here);
+
+        Bash::echo('Application env changes to ' . $target);
+    }
+
     public function initAction(){
         $here = getcwd();
         if(Fs::scan($here))

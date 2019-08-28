@@ -7,7 +7,7 @@
 
 return [
     '__name' => 'cli-app',
-    '__version' => '0.0.14',
+    '__version' => '0.0.15',
     '__git' => 'git@github.com:getphun/cli-app.git',
     '__license' => 'MIT',
     '__author' => [
@@ -126,12 +126,30 @@ return [
                     'value' => 'server'
                 ],
                 'handler' => 'CliApp\\Controller\\Server::test'
+            ],
+            'toolAppEnv' => [
+                'info' => 'Change application environment',
+                'path' => [
+                    'value' => 'env (:target)',
+                    'params' => [
+                        'target' => 'slug'
+                    ]
+                ],
+                'handler' => 'CliApp\\Controller\\Application::env'
             ]
         ]
     ],
 
     'cli' => [
         'autocomplete' => [
+            '!^app env( .*)?$!' => [
+                'priority' => 5,
+                'handler' => [
+                    'class' => 'CliApp\\Library\\Autocomplete',
+                    'method' => 'env'
+                ]
+            ],
+
             '!^app (install|remove|update)( .*)?$!' => [
                 'priority' => 5,
                 'handler' => [

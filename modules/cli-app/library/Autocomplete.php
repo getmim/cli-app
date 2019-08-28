@@ -9,6 +9,10 @@ namespace CliApp\Library;
 
 class Autocomplete extends \Cli\Autocomplete
 {
+    static function env(): string{
+        return 'production development testing';
+    }
+
     static function none(): string{
         return '1';
     }

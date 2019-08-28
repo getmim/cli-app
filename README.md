@@ -8,9 +8,10 @@ tools diinstall.
 Di bawah ini adalah perintah-perintah yang dilayani oleh module ini:
 
 ```
-mim app init
 mim app config
+mim app env (production|development|testing|...)
 mim app gitignore
+mim app init
 mim app install (module[ ...]) | -
 mim app module
 mim app remove (module[ ...]) | -
@@ -49,5 +50,5 @@ Class{
 }
 ```
 
-Class handler harus bisa berdiri sendiri karena fungsi ini akan di panggil didalam
+Class handler harus bisa berdiri sendiri karena fungsi ini akan di panggil di dalam
 scope cli, dan bukan scope aplikasi.
