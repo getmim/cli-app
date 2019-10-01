@@ -230,13 +230,13 @@ class Config
                     $conf->asset->host = str_replace('HOST', $configs->host, $conf->asset->host);
 
                 $res = (object)[
-                    'name'      => $name,
-                    'priority'  => $conf->priority ?? 1000,
-                    'host'      => self::_reqHost($configs, $conf->host),
-                    'path'      => self::_reqPath($configs, $conf->path, $conf, true),
-                    'asset'     => $conf->asset,
-                    'middlewares' => $conf->middlewares ?? (object)[],
-                    'errors'    => (object)[]
+                    'name'          => $name,
+                    'priority'      => $conf->priority ?? 1000,
+                    'host'          => self::_reqHost($configs, $conf->host),
+                    'path'          => self::_reqPath($configs, $conf->path, $conf, true),
+                    'asset'         => $conf->asset,
+                    'middlewares'   => $conf->middlewares ?? (object)[],
+                    'errors'        => (object)[]
                 ];
 
                 if(isset($routes->$name)){
@@ -271,9 +271,9 @@ class Config
     }
     
     private static function _parseRoutes(object &$configs, string $here): void{
-        $nl = PHP_EOL;
-        $result  = (object)[];
-        
+        $nl     = PHP_EOL;
+        $result = (object)[];
+
         if(isset($configs->routes)){
             $result->_gateof = (object)[];
             
@@ -285,14 +285,30 @@ class Config
                 if(!isset($gates->$gname))
                     continue;
                 
-                $gate = $gates->$gname;
-                $sep  = $gate->host->value === 'CLI' ? ' ' : '/';
+                $gate         = $gates->$gname;
+                $sep          = $gate->host->value === 'CLI' ? ' ' : '/';
                 $gpath_params = $gate->path->params ?? (object)[];
-                $gpath = $gate->path->value;
+                $gpath        = $gate->path->value;
                 
                 foreach($routes as $rname => $conf){
                     if(in_array($rname, ['404','500']))
                         continue;
+                    
+                    if(isset($conf->modules)){
+                        $dont_use = false;
+                        foreach($conf->modules as $mod => $use){
+                            if(!$use)
+                                continue;
+                            if(!in_array($mod, $configs->_modules)){
+                                $dont_use = true;
+                                break;
+                            }
+                        }
+
+                        if($dont_use)
+                            continue;
+                    }
+
                     $result->_gateof->$rname = $gname;
                     
                     $conf->name = $rname;
