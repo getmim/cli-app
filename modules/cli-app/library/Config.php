@@ -391,7 +391,30 @@ class Config
             $configs[0]['_modules'][] = $mod;
         }
 
-        $configs[] = include $app_config_file;
+        $app_config = include $app_config_file;
+
+        // .includes
+        if(isset($app_config['includes'])){
+            foreach($app_config['includes'] as $file => $cond){
+                if(!$cond)
+                    continue;
+                if(substr($file,0,1) != '/')
+                    $file = realpath($here . '/' . $file);
+                $file = chop($file, '/');
+
+                if(is_file($file)){
+                    $configs[] = include $file;
+                }elseif(is_dir($file)){
+                    $inc_files = Fs::scan($file);
+                    foreach($inc_files as $inc_file){
+                        if(substr($inc_file, -4) === '.php')
+                            $configs[] = include $file . '/' . $inc_file;
+                    }
+                }
+            }
+        }
+
+        $configs[] = $app_config;
         $env = trim(file_get_contents($here . '/etc/.env'));
         $env_config_file = $here . '/etc/config/' . $env . '.php';
         if(is_file($env_config_file))
