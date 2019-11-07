@@ -22,6 +22,24 @@ class Module
     static function addGitIgnoreDb(string $here, array $config): void{
         self::regenerateGitIgnoreDb($here);
     }
+
+    static function addModuleIgnoredDb(string $here, string $name): void{
+        $nl = PHP_EOL;
+        $ignore_modules_file = self::getIgnoredModuleFile($here);
+        $ignore_modules = [];
+        if(is_file($ignore_modules_file))
+            $ignore_modules = include $ignore_modules_file;
+        $ignore_modules[$name] = time();
+
+        $source = to_source($ignore_modules);
+        $tx = '<?php' . $nl;
+        $tx.= '/* GENERATE BY CLI */' . $nl;
+        $tx.= '/* DON\'T MODIFY */' . $nl;
+        $tx.= $nl;
+        $tx.= 'return ' . $source . ';';
+        
+        Fs::write($ignore_modules_file, $tx);
+    }
     
     static function addModuleDb(string $here, object $temp): void{
         $nl = PHP_EOL;
@@ -44,6 +62,18 @@ class Module
         $tx.= 'return ' . $source . ';';
         
         Fs::write($app_modules_file, $tx);
+    }
+
+    static function getIgnoredModuleFile(string $here): string{
+        return $here . '/etc/modules-skipped.php';
+    }
+
+    static function getIgnoredModules(string $here): array{
+        $ignore_modules_file = self::getIgnoredModuleFile($here);
+        if(!is_file($ignore_modules_file))
+            return [];
+
+        return include $ignore_modules_file;
     }
     
     static function installDependencies(string $here, array $devs, bool $ignore_dev=false): void{
@@ -84,10 +114,23 @@ class Module
                 }
 
             }elseif(in_array($type, ['optional', 'required'])){
+                $ignored_modules = self::getIgnoredModules($here);
+
                 foreach($modules as $mods){
                     $mods_len = count($mods);
 
                     if($ignore_dev && $type === 'optional')
+                        continue;
+
+                    // let find if there's dev that is not ignored
+                    $non_ignored_modules = [];
+                    foreach($mods as $mod_name => $mod_uri){
+                        if(!isset($ignored_modules[$mod_name]))
+                            $non_ignored_modules[] = $mod_name;
+                    }
+
+                    // no module to install, skip process
+                    if(!$non_ignored_modules)
                         continue;
                     
                     if($mods_len === 1){
@@ -107,8 +150,10 @@ class Module
                             if(!$install_it){
                                 if(!in_array($mod_name, self::$skipInstallModules)){
                                     $install_it = Bash::ask($ask_conf);
-                                    if(!$install_it)
+                                    if(!$install_it){
                                         self::$skipInstallModules[] = $mod_name;
+                                        self::addModuleIgnoredDb($here, $mod_name);
+                                    }
                                 }
                             }
 
@@ -145,8 +190,10 @@ class Module
                         
                         if($mod_name === '(none)'){
                             foreach($ask_conf['options'] as $idx => $mod_name){
-                                if($idx)
+                                if($idx){
                                     self::$skipInstallModules[] = $mod_name;
+                                    self::addModuleIgnoredDb($here, $mod_name);
+                                }
                             }
                             continue;
                         }

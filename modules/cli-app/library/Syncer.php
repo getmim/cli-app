@@ -18,7 +18,7 @@ class Syncer
         $dir_files = Fs::scan($dir_abs);
         
         foreach($dir_files as $file){
-            // remove editor temp file
+            // skip editor temp file
             if(preg_match('!\.kate-swp$!', $file))
                 continue;
             $file_path = $path . '/' . $file;
