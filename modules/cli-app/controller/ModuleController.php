@@ -47,6 +47,8 @@ class ModuleController extends \CliApp\Controller
         $modules = include $module_file;
         
         $printed = [];
+
+        ksort($modules);
         
         foreach($modules as $name => $repo){
             $mod_conf = $module_dir . '/' . $name . '/config.php';

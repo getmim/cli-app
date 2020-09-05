@@ -8,6 +8,7 @@
 namespace CliApp\Library;
 
 use CliApp\Library\{
+    Apps,
     ConfigInjector,
     Git,
     Syncer
@@ -18,6 +19,21 @@ use Mim\Library\Fs;
 class Module
 {
     private static $skipInstallModules = [];
+
+    private static function registerAppList(string $here): void{
+        $env  = trim(file_get_contents($here . '/etc/.env'));
+        $app_config = include $here . '/etc/config/main.php';
+        $host = $app_config['host'];
+
+        $env_config_file = $here . '/etc/config/' . $env . '.php';
+        if(is_file($env_config_file)){
+            $env_config = include $env_config_file;
+            if(isset($env_config['host']))
+                $host = $env_config['host'];
+        }
+
+        Apps::add($host, $here);
+    }
 
     static function addGitIgnoreDb(string $here, array $config): void{
         self::regenerateGitIgnoreDb($here);
@@ -239,6 +255,8 @@ class Module
             if(!is_file($here . '/' . $file))
                 return false;
         }
+
+        self::registerAppList($here);
         
         return true;
     }

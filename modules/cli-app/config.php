@@ -1,13 +1,8 @@
 <?php
-/**
- * CLI Application
- * @package cli-app 
- * @version 0.0.8
- */
 
 return [
     '__name' => 'cli-app',
-    '__version' => '0.2.0',
+    '__version' => '0.3.0',
     '__git' => 'git@github.com:getphun/cli-app.git',
     '__license' => 'MIT',
     '__author' => [
@@ -16,12 +11,12 @@ return [
         'website' => 'https://iqbalfn.com/'
     ],
     '__files' => [
-        'modules/cli-app' => ['install', 'update', 'remove']
+        'modules/cli-app' => ['install','update','remove']
     ],
     '__dependencies' => [
         'required' => [
             [
-                'cli' => null
+                'cli' => NULL
             ]
         ],
         'optional' => []
@@ -52,13 +47,12 @@ return [
     ],
     'routes' => [
         'tool-app' => [
-            '404' => [
+            404 => [
                 'handler' => 'Cli\\Controller::show404'
             ],
-            '500' => [
+            500 => [
                 'handler' => 'Cli\\Controller::show500'
             ],
-            
             'toolAppConfig' => [
                 'info' => 'Regenerate application configs',
                 'path' => [
@@ -66,7 +60,6 @@ return [
                 ],
                 'handler' => 'CliApp\\Controller\\Config::generate'
             ],
-            
             'toolAppInit' => [
                 'info' => 'Create empty application on current directory',
                 'path' => [
@@ -74,7 +67,6 @@ return [
                 ],
                 'handler' => 'CliApp\\Controller\\Application::init'
             ],
-            
             'toolAppGitIgnore' => [
                 'info' => 'Create or regenerate application gitignore file',
                 'path' => [
@@ -82,7 +74,13 @@ return [
                 ],
                 'handler' => 'CliApp\\Controller\\Application::gitignore'
             ],
-            
+            'toolAppList' => [
+                'info' => 'Show all known mim apps on current machine',
+                'path' => [
+                    'value' => 'list'
+                ],
+                'handler' => 'CliApp\\Controller\\Application::list'
+            ],
             'toolAppModuleIndex' => [
                 'info' => 'List of all modules under current application',
                 'path' => [
@@ -139,7 +137,6 @@ return [
             ]
         ]
     ],
-
     'cli' => [
         'autocomplete' => [
             '!^app env( .*)?$!' => [
@@ -149,7 +146,6 @@ return [
                     'method' => 'env'
                 ]
             ],
-
             '!^app (install|remove|update)( .*)?$!' => [
                 'priority' => 5,
                 'handler' => [
@@ -157,15 +153,13 @@ return [
                     'method' => 'module'
                 ]
             ],
-
-            '!^app (config|init|module|server)$!' => [
+            '!^app (config|init|list|module|server)$!' => [
                 'priority' => 4,
                 'handler' => [
                     'class' => 'CliApp\\Library\\Autocomplete',
                     'method' => 'none'
                 ]
             ],
-
             '!^app( [a-z]*)?$!' => [
                 'priority' => 3,
                 'handler' => [

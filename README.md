@@ -13,6 +13,7 @@ mim app env (production|development|testing|...)
 mim app gitignore
 mim app init
 mim app install (module[ ...]) | -
+mim app list
 mim app module
 mim app remove (module[ ...]) | -
 mim app server
