@@ -60,6 +60,16 @@ return [
                 ],
                 'handler' => 'CliApp\\Controller\\Config::generate'
             ],
+            'toolAppEnv' => [
+                'info' => 'Change application environment',
+                'path' => [
+                    'value' => 'env (:target)',
+                    'params' => [
+                        'target' => 'slug'
+                    ]
+                ],
+                'handler' => 'CliApp\\Controller\\Application::env'
+            ],
             'toolAppInit' => [
                 'info' => 'Create empty application on current directory',
                 'path' => [
@@ -124,16 +134,6 @@ return [
                     'value' => 'server'
                 ],
                 'handler' => 'CliApp\\Controller\\Server::test'
-            ],
-            'toolAppEnv' => [
-                'info' => 'Change application environment',
-                'path' => [
-                    'value' => 'env (:target)',
-                    'params' => [
-                        'target' => 'slug'
-                    ]
-                ],
-                'handler' => 'CliApp\\Controller\\Application::env'
             ]
         ]
     ],

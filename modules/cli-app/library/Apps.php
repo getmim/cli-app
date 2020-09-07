@@ -13,6 +13,9 @@ class Apps
 	private static $cache_file = '/etc/cache/app-list.php';
 
 	static function add(string $host, string $path): void{
+		if(!$host)
+			return;
+		
 		$hosts = self::getAll();
 
 		if(isset($hosts[$host])){

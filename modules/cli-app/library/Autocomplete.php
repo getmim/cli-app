@@ -38,6 +38,16 @@ class Autocomplete extends \Cli\Autocomplete
         return parent::lastArg($farg, $result);
     }
 
+    static function host(): string{
+        $hosts = Apps::getAll();
+        if(!$hosts)
+            return '1';
+
+        $hosts = array_keys($hosts);
+
+        return trim(implode(' ', $hosts));
+    }
+
     static function module(array $args): string{
         $mod_file = getcwd() . '/etc/modules.php';
         if(!is_file($mod_file))
