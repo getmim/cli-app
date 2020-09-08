@@ -134,6 +134,13 @@ return [
                     'value' => 'server'
                 ],
                 'handler' => 'CliApp\\Controller\\Server::test'
+            ],
+            'toolAppTo' => [
+                'info' => 'Go to mim app dir on current machine',
+                'path' => [
+                    'value' => 'to (:host)'
+                ],
+                'handler' => 'CliApp\\Controller\\Application::to'
             ]
         ]
     ],
@@ -151,6 +158,13 @@ return [
                 'handler' => [
                     'class' => 'CliApp\\Library\\Autocomplete',
                     'method' => 'module'
+                ]
+            ],
+            '!^app to( .*)?$!' => [
+                'priority' => 5,
+                'handler' => [
+                    'class' => 'CliApp\\Library\\Autocomplete',
+                    'method' => 'host'
                 ]
             ],
             '!^app (config|init|list|module|server)$!' => [

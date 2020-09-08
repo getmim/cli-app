@@ -91,11 +91,27 @@ class ApplicationController extends \CliApp\Controller
                 unset($dirs[$findex]);
             unset($dirs);
         }
-
+        
         ksort($apps);
         $max_host_len++;
         Bash::echo(implode('/', $base_path));
         foreach($apps as $host => $path)
             Bash::echo('- ' . str_pad($host, $max_host_len, ' ') . ': .../' . implode('/', $path));
+    }
+
+    public function toAction(){
+        $apps = Apps::getAll();
+        if(!$apps)
+            return;
+
+        $host = $this->req->param->host;
+        if(!isset($apps[$host]))
+            return Bash::error('App dir not found');
+
+        $path = $apps[$host];
+
+        $cmd = '> cd ' . $path . ' && exec "$SHELL"';
+
+        Bash::echo($cmd);
     }
 }
