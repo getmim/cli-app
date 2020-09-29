@@ -80,7 +80,7 @@ class ConfigInjector
         if(!class_exists($class, false))
             self::_loadAppClass($class);
         
-        return $class::$method();
+        return $class::$method( self::$app_dir );
     }
     
     private static function scanForNew(array $config, array $inject): array{
@@ -187,7 +187,7 @@ class ConfigInjector
         return $result;
     }
     
-    static function injectConfigs(array &$config, array $items, int $space=0): void{
+    static function injectConfigs(array &$config, array $items, int $space=0, array $app_config=null): void{
         $next_space = $space + 2;
         foreach($items as $item){
             $children = $item['children'] ?? null;
@@ -213,7 +213,7 @@ class ConfigInjector
                         $method= $injector['method'];
                         if(!class_exists($class, false))
                             self::_loadAppClass($class);
-                        $value = $class::$method($config, $value);
+                        $value = $class::$method($config, $value, $app_config);
                         if(is_null($value))
                             continue;
                     }
@@ -225,7 +225,7 @@ class ConfigInjector
                         $question = $item['question'];
                         Bash::echo($question, $space);
                     }
-                    self::injectConfigs($config[$used_name], $children, $next_space);
+                    self::injectConfigs($config[$used_name], $children, $next_space, $app_config);
                     if($config[$used_name] === [])
                         unset($config[$used_name]);
                 }
@@ -260,7 +260,7 @@ class ConfigInjector
         if(!Bash::ask(['text'=>'Would you like me to configure it now', 'type'=>'bool', 'default'=>true]))
             return;
         
-        self::injectConfigs($app_config, $to_append);
+        self::injectConfigs($app_config, $to_append, 0, $app_config);
         
         $tx = '<?php' . $nl;
         $tx.= $nl;
