@@ -109,6 +109,10 @@ class ApplicationController extends \CliApp\Controller
             return Bash::error('App dir not found');
 
         $path = $apps[$host];
+        if(!is_dir($path)){
+            Apps::remove($host);
+            return Bash::error('App is not there anymore');
+        }
 
         $cmd = '> cd ' . $path . ' && exec "$SHELL"';
 

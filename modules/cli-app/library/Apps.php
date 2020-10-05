@@ -45,4 +45,17 @@ class Apps
 			return [];
 		return include $file;
 	}
+
+	static function remove(string $host): void{
+		$hosts = self::getAll();
+		if(isset($hosts[$host]))
+			unset($hosts[$host]);
+
+		$tx = '<?php' . PHP_EOL;
+        $tx.= 'return ' . to_source($hosts) . ';';
+        
+        $f = fopen(BASEPATH . self::$cache_file, 'w');
+        fwrite($f, $tx);
+        fclose($f);
+	}
 }
