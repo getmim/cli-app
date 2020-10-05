@@ -363,6 +363,8 @@ class Config
         if(!is_dir($module_dir))
             return null;
 
+        $user_app = $here . '/app';
+
         $app_config_file = $here . '/etc/config/main.php';
         if(!is_file($app_config_file))
             return null;
@@ -373,22 +375,35 @@ class Config
         $modules = Fs::scan($module_dir);
 
         foreach($modules as $mod){
-            $mod_path = $module_dir . '/' . $mod;
-            if(!is_dir($mod_path))
-                continue;
-            $mod_conf_file = $mod_path . '/config.php';
-            if(!is_file($mod_conf_file))
-                Bash::error('Module `' . $mod . '` has no config file');
-            $mod_conf = include $mod_conf_file;
-            $mod_conf_filtered = [];
-            foreach($mod_conf as $cname => $cval){
-                if(substr($cname,0,2) === '__')
+            $config_dir = [
+                $module_dir . '/' . $mod,
+                $user_app   . '/' . $mod
+            ];
+
+            foreach($config_dir as $idx => $mod_path){
+                if(!is_dir($mod_path))
                     continue;
-                $mod_conf_filtered[$cname] = $cval;
+
+                $mod_conf_file = $mod_path . '/config.php';
+                if(!is_file($mod_conf_file)){
+                    if(!$idx)
+                        Bash::error('Module `' . $mod . '` has no config file');
+                    continue;
+                }
+
+                $mod_conf = include $mod_conf_file;
+                $mod_conf_filtered = [];
+
+                foreach($mod_conf as $cname => $cval){
+                    if(substr($cname,0,2) === '__')
+                        continue;
+                    $mod_conf_filtered[$cname] = $cval;
+                }
+
+                $configs[] = $mod_conf_filtered;
+
+                $configs[0]['_modules'][] = $mod;
             }
-            $configs[] = $mod_conf_filtered;
-            
-            $configs[0]['_modules'][] = $mod;
         }
 
         $app_config = include $app_config_file;
