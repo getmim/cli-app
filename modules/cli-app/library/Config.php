@@ -15,7 +15,7 @@ class Config
 
     private static $app_autoload;
 
-    private static function _reqHandler(object $route, object $gate): object{
+    private static function _reqHandler(object $route, object $gate, bool $inc_middleware=true): object{
         $route->_handlers = [];
         
         // let combine route middlewares and gate middlewares
@@ -27,7 +27,7 @@ class Config
         
         $sources = [$gate,$route];
         foreach($sources as $source){
-            if(!isset($source->middlewares))
+            if(!isset($source->middlewares) || !$inc_middleware)
                 continue;
             foreach($handlers as $group => $hdrs){
                 if(!isset($source->middlewares->$group))
@@ -242,12 +242,12 @@ class Config
                 if(isset($routes->$name)){
                     // 404
                     if(isset($routes->$name->{'404'})){
-                        $res->errors->{'404'} = self::_reqHandler($routes->$name->{'404'}, $conf);
+                        $res->errors->{'404'} = self::_reqHandler($routes->$name->{'404'}, $conf, false);
                     }
                     
                     // 500
                     if(isset($routes->$name->{'500'})){
-                        $res->errors->{'500'} = self::_reqHandler($routes->$name->{'500'}, $conf);
+                        $res->errors->{'500'} = self::_reqHandler($routes->$name->{'500'}, $conf, false);
                     }
                 }
                 
