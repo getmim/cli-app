@@ -77,12 +77,13 @@ class ModuleController extends \CliApp\Controller
     }
     
     public function installAction(){
-        $modules = $this->filterArgModules($this->req->param->modules);
+        $arg_modules = $this->req->param->modules ?? ['-'];
+        $modules = $this->filterArgModules($arg_modules);
         if(!$modules)
             Bash::error('No module to process');
 
         $ignore_dev = false;
-        if($this->req->param->modules && $this->req->param->modules[0] === '-')
+        if($arg_modules && $arg_modules[0] === '-')
             $ignore_dev = true;
         
         $here = getcwd();
@@ -114,12 +115,13 @@ class ModuleController extends \CliApp\Controller
     }
     
     public function updateAction(){
-        $modules = $this->filterArgModules($this->req->param->modules);
+        $arg_modules = $this->req->param->modules ?? ['-'];
+        $modules = $this->filterArgModules($arg_modules);
         if(!$modules)
             Bash::error('No module to process');
 
         $ignore_dev = false;
-        if($this->req->param->modules && $this->req->param->modules[0] === '-')
+        if($arg_modules && $arg_modules[0] === '-')
             $ignore_dev = true;
 
         $here = getcwd();
@@ -146,7 +148,8 @@ class ModuleController extends \CliApp\Controller
     }
     
     public function removeAction(){
-        $modules = $this->filterArgModules($this->req->param->modules);
+        $arg_modules = $this->req->param->modules ?? ['-'];
+        $modules = $this->filterArgModules($arg_modules);
         if(!$modules)
             Bash::error('No module to process');
         

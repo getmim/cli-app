@@ -2,7 +2,7 @@
 
 return [
     '__name' => 'cli-app',
-    '__version' => '0.6.1',
+    '__version' => '0.7.0',
     '__git' => 'git@github.com:getphun/cli-app.git',
     '__license' => 'MIT',
     '__author' => [
@@ -98,6 +98,13 @@ return [
                 ],
                 'handler' => 'CliApp\\Controller\\Module::index'
             ],
+            'toolAppModuleInstallAll' => [
+                'info' => 'Install all registered modules to the current application',
+                'path' => [
+                    'value' => 'install'
+                ],
+                'handler' => 'CliApp\\Controller\\Module::install'
+            ],
             'toolAppModuleInstall' => [
                 'info' => 'Install new module to the current application',
                 'path' => [
@@ -108,6 +115,13 @@ return [
                 ],
                 'handler' => 'CliApp\\Controller\\Module::install'
             ],
+            'toolAppModuleRemoveAll' => [
+                'info' => 'Remove all exists modules from this application',
+                'path' => [
+                    'value' => 'remove'
+                ],
+                'handler' => 'CliApp\\Controller\\Module::remove'
+            ],
             'toolAppModuleRemove' => [
                 'info' => 'Remove exists modules from this application',
                 'path' => [
@@ -117,6 +131,13 @@ return [
                     ]
                 ],
                 'handler' => 'CliApp\\Controller\\Module::remove'
+            ],
+            'toolAppModuleUpdateAll' => [
+                'info' => 'Update all exists modules in this application',
+                'path' => [
+                    'value' => 'update'
+                ],
+                'handler' => 'CliApp\\Controller\\Module::update'
             ],
             'toolAppModuleUpdate' => [
                 'info' => 'Update exists modules in this application',

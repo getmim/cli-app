@@ -12,12 +12,12 @@ mim app config
 mim app env (production|development|testing|...)
 mim app gitignore
 mim app init
-mim app install (module[ ...]) | -
+mim app install (module[ ...])
 mim app list
 mim app module
-mim app remove (module[ ...]) | -
+mim app remove (module[ ...])
 mim app server
-mim app update (module[ ...]) | -
+mim app update (module[ ...])
 ```
 
 Nilai `-` pada perintah `install`, `update`, dan `remove` berarti melakukan aksi
