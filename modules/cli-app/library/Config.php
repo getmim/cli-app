@@ -2,13 +2,14 @@
 /**
  * Config library
  * @package cli-app
- * @version 0.0.5
+ * @version 0.7.1
  */
 
 namespace CliApp\Library;
 
 use Mim\Library\Fs;
 use Cli\Library\Bash;
+use StableSort\StableSort;
 
 class Config
 {
@@ -17,14 +18,14 @@ class Config
 
     private static function _reqHandler(object $route, object $gate, bool $inc_middleware=true): object{
         $route->_handlers = [];
-        
+
         // let combine route middlewares and gate middlewares
         $handlers = [
             'pre'  => [],
             'main' => [ $route->handler => 1 ],
             'post' => []
         ];
-        
+
         $sources = [$gate,$route];
         foreach($sources as $source){
             if(!isset($source->middlewares) || !$inc_middleware)
@@ -32,60 +33,60 @@ class Config
             foreach($handlers as $group => $hdrs){
                 if(!isset($source->middlewares->$group))
                     continue;
-            
+
                 foreach($source->middlewares->$group as $handler => $order)
                     $handlers[$group][$handler] = $order;
                 asort($handlers[$group]);
             }
         }
-        
+
         foreach($handlers as $key => $hds){
             foreach($hds as $hd => $o){
                 $hdrs = explode('::', $hd);
                 $suffix = $key === 'main' ? 'Controller' : 'Middleware';
                 if(substr($hdrs[0], -strlen($suffix)) !== $suffix)
                     $hdrs[0].= $suffix;
-                    
+
                 $hdr = (object)[
                     'class' => $hdrs[0],
                     'method' => $hdrs[1] . 'Action'
                 ];
-                
+
                 if($hd === 'main')
                     $route->handler = $hdr;
                 $hdr->solved = false;
                 $route->_handlers[] = $hdr;
             }
         }
-        
+
         return $route;
     }
-    
+
     private static function _reqHost(object $config, object $conf): object{
         $result = (object)[
             'value' => $conf->value,
             'params' => $conf->params ?? (object)[],
             '_type' => 'text'
         ];
-        
+
         if($conf->value === 'CLI')
             return $result;
-        
+
         if(strstr($conf->value, 'HOST'))
             $result->value = str_replace('HOST', $config->host, $conf->value);
-        
+
         if(!preg_match_all('!\(:([a-z]+)\)!', $conf->value, $match))
             return $result;
-        
+
         $result->_type = 'regex';
-        
+
         $regex = '!^' . str_replace('.', '\\.', $result->value) . '$!';
         foreach($match[1] as $key){
             $type = $result->params->$key ?? 'any';
             $rval = '(?<' . $key . '>';
-            
+
             $result->params->$key = $type;
-            
+
             if(is_array($type)){
                 $rval.= '(' . implode('|', $type) . ')';
             }else{
@@ -103,17 +104,17 @@ class Config
                     $rval.= '.+';
                 }
             }
-            
+
             $rval.= ')';
-            
+
             $regex = str_replace('(:' . $key . ')', $rval, $regex);
         }
-        
+
         $result->_value = $regex;
-        
+
         return $result;
     }
-    
+
     private static function _reqPath(object $config, object $conf, ?object $gate, bool $rest): object{
         $result = (object)[
             'value' => $conf->value,
@@ -127,18 +128,18 @@ class Config
         $result->_type = 'regex';
 
         $is_cli = $gate->host->value === 'CLI';
-        
+
         if(!$is_cli)
             $regex = '!^' . str_replace('/', '\\/', $result->value) . ($rest?'((\/.*))*':'') . '$!';
         else
             $regex = '!^' . $result->value . ($rest?'(( .*))*':'') . '$!';
-        
+
         foreach($match[1] as $key){
             $type = $result->params->$key ?? 'any';
             $rval = '(?<' . $key . '>';
-            
+
             $result->params->$key = $type;
-            
+
             if(is_array($type)){
                 $rval.= '(' . implode('|', $type) . ')';
             }else{
@@ -157,14 +158,14 @@ class Config
                     $rval.= '.+';
                 }
             }
-            
+
             $rval.= ')';
-            
+
             $regex = str_replace('(:' . $key . ')', $rval, $regex);
         }
-        
+
         $result->_value = $regex;
-        
+
         return $result;
     }
 
@@ -172,7 +173,7 @@ class Config
         if(isset(self::$app_autoload->classes->$name))
             require_once $here . '/' . self::$app_autoload->classes->$name;
     }
-    
+
     private static function _parseAutoload(object &$config, string $here): void{
         $result = AutoloadParser::parse($config, $here);
         self::$app_autoload = $result;
@@ -182,21 +183,21 @@ class Config
     private static function _parseCallback(object &$configs, string $here): void{
         if(!isset($configs->callback))
             return;
-        
+
         foreach($configs->callback as $module => &$modules){
             foreach($modules as $event => &$events){
                 $new_events = [];
                 foreach($events as $handler => $cond){
                     if(!$cond)
                         continue;
-                    
+
                     $handler = explode('::', $handler);
                     $class  = $handler[0];
                     $method = $handler[1];
-                    
+
                     $new_events[] = (object)[
                         'class' => $class,
-                        'method' => $method 
+                        'method' => $method
                     ];
                 }
                 $events = $new_events;
@@ -215,14 +216,14 @@ class Config
             $cls::$mth($configs, $here);
         }
     }
-    
+
     private static function _parseGates(object &$configs, string $here): void{
         $nl = PHP_EOL;
         $result = [];
-        
+
         if(isset($configs->gates)){
             $routes = $configs->routes ?? (object)[];
-            
+
             foreach($configs->gates as $name => $conf){
                 if(!isset($conf->asset))
                     $conf->asset = (object)['host' => $conf->host->value];
@@ -244,56 +245,56 @@ class Config
                     if(isset($routes->$name->{'404'})){
                         $res->errors->{'404'} = self::_reqHandler($routes->$name->{'404'}, $conf, false);
                     }
-                    
+
                     // 500
                     if(isset($routes->$name->{'500'})){
                         $res->errors->{'500'} = self::_reqHandler($routes->$name->{'500'}, $conf, false);
                     }
                 }
-                
+
                 $result[] = $res;
             }
-            
-            usort($result, function($a, $b){
+
+            StableSort::usort($result, function($a, $b){
                 return $b->priority - $a->priority;
             });
         }
-        
+
         $source = to_source($result);
-        
+
         $tx = '<?php' . $nl;
         $tx.= '/* GENERATE BY CLI */' . $nl;
         $tx.= '/* DON\'T MODIFY */' . $nl;
         $tx.= $nl;
         $tx.= 'return ' . $source . ';';
-        
+
         Fs::write($here . '/etc/cache/gates.php', $tx);
     }
-    
+
     private static function _parseRoutes(object &$configs, string $here): void{
         $nl     = PHP_EOL;
         $result = (object)[];
 
         if(isset($configs->routes)){
             $result->_gateof = (object)[];
-            
+
             $gates   = $configs->gates ?? (object)[];
             $groutes = $configs->routes;
-            
+
             foreach($groutes as $gname => $routes){
                 $gate_routes = [];
                 if(!isset($gates->$gname))
                     continue;
-                
+
                 $gate         = $gates->$gname;
                 $sep          = $gate->host->value === 'CLI' ? ' ' : '/';
                 $gpath_params = $gate->path->params ?? (object)[];
                 $gpath        = $gate->path->value;
-                
+
                 foreach($routes as $rname => $conf){
                     if(in_array($rname, ['404','500']))
                         continue;
-                    
+
                     if(isset($conf->modules)){
                         $dont_use = false;
                         foreach($conf->modules as $mod => $use){
@@ -310,14 +311,14 @@ class Config
                     }
 
                     $result->_gateof->$rname = $gname;
-                    
+
                     $conf->name = $rname;
                     $conf->priority = $conf->priority ?? 1000;
                     $conf->middlewares = $conf->middlewares ?? (object)[];
-                    
+
                     $route_path_params = $conf->path->params ?? (object)[];
                     $combine_path_params = object_replace($gpath_params, $route_path_params);
-                    
+
                     $conf->path->params = $combine_path_params;
                     $route_path = $conf->path->value;
                     $combined_path = $gpath . $sep . ltrim($route_path, $sep);
@@ -325,7 +326,7 @@ class Config
                     if($sep === '/')
                         $combined_path = '/' . $combined_path;
                     $conf->path->value = $combined_path;
-                    
+
                     $conf->path = self::_reqPath($configs, $conf->path, $gate, false);
 
                     if($sep === '/'){
@@ -333,28 +334,28 @@ class Config
                             $conf->method = 'GET';
                         $conf->_method = explode('|', $conf->method);
                     }
-                    
+
                     $conf = self::_reqHandler($conf, $gate);
 
                     $gate_routes[$rname] = $conf;
                 }
-                
-                uasort($gate_routes, function($a, $b){
-                    return $a->priority - $b->priority;
+
+                StableSort::uasort($gate_routes, function($a, $b){
+                    return $b->priority - $a->priority;
                 });
-                
+
                 $result->$gname = (object)$gate_routes;
             }
         }
-        
+
         $source = to_source($result);
-        
+
         $tx = '<?php' . $nl;
         $tx.= '/* GENERATE BY CLI */' . $nl;
         $tx.= '/* DON\'T MODIFY */' . $nl;
         $tx.= $nl;
         $tx.= 'return ' . $source . ';';
-        
+
         Fs::write($here . '/etc/cache/routes.php', $tx);
     }
 
@@ -440,10 +441,10 @@ class Config
 
         return $configs;
     }
-    
+
     static function init(string $here): void{
         $nl = PHP_EOL;
-        
+
         $configs = self::fetch($here);
         if(!$configs)
             return;
@@ -452,17 +453,17 @@ class Config
         self::_parseGates($configs, $here);
         self::_parseRoutes($configs, $here);
         self::_parseCallback($configs, $here);
-        
+
         if(isset($configs->__gitignore))
             unset($configs->__gitignore);
         $source = to_source($configs);
-        
+
         $tx = '<?php' . $nl;
         $tx.= '/* GENERATE BY CLI */' . $nl;
         $tx.= '/* DON\'T MODIFY */' . $nl;
         $tx.= $nl;
         $tx.= 'return ' . $source . ';';
-        
+
         Fs::write($here . '/etc/cache/config.php', $tx);
     }
 }
