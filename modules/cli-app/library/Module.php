@@ -299,10 +299,10 @@ class Module
     static function install(string $here, string $module, string $uri=null, bool $ignore_dev=false): bool{
         Bash::echo('Installing module `' . $module . '`');
 
-        if ($uri === '~') {
-            $temp = Local::copy($here, $module);
-        } else {
-            // download the module
+        $force = $uri == '~' ? true : false;
+        $temp = Local::copy($here, $module, $force);
+
+        if (!$temp) {
             $temp = Git::download($here, $module, $uri);
         }
 
@@ -490,7 +490,6 @@ class Module
         
         if ($uri === '~') {
             $temp = Local::copy($here, $module);
-            return true;
         } else {
             // download the module
             $temp = Git::download($here, $module, $uri);

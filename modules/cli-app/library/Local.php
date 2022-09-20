@@ -12,7 +12,7 @@ use \Cli\Library\Bash;
 
 Class Local
 {
-    protected static function _makeUri(string $here, string $name): ?object
+    protected static function _makeUri(string $here, string $name, bool $force): ?object
     {
         $result = (object)[
             'name'      => $name,
@@ -47,36 +47,42 @@ Class Local
             }
         }
 
-        if (!$result->urls) {
-            Bash::echo('No repo found, please provide path to local dir');
-            while(true) {
-                $path = Bash::ask([
-                    'text' => 'Module local path',
-                    'required' => true
-                ]);
+        if ($force) {
+            if (!$result->urls) {
+                Bash::echo('No repo found, please provide path to local dir');
+                while(true) {
+                    $path = Bash::ask([
+                        'text' => 'Module local path',
+                        'required' => true
+                    ]);
 
-                if (!is_dir($path)) {
-                    Bash::echo('Error: Path not found');
-                    continue;
+                    if (!is_dir($path)) {
+                        Bash::echo('Error: Path not found');
+                        continue;
+                    }
+
+                    $result->urls = (object)[
+                        'file' => (object)[
+                            'value' => $path,
+                            'asks' => (object)[],
+                            'used' => true
+                        ]
+                    ];
+
+                    break;
                 }
-
-                $result->urls = (object)[
-                    'file' => (object)[
-                        'value' => $path,
-                        'asks' => (object)[],
-                        'used' => true
-                    ]
-                ];
-
-                break;
             }
+        }
+
+        if (!$result->urls) {
+            return null;
         }
 
         return $result;
     }
 
-    static function copy(string $here, string $name): ?object{
-        $repo = self::_makeUri($here, $name);
+    static function copy(string $here, string $name, bool $force): ?object{
+        $repo = self::_makeUri($here, $name, $force);
         if(!$repo)
             return null;
 

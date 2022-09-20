@@ -133,13 +133,14 @@ class ModuleController extends \CliApp\Controller
                 Bash::error('Module `' . $name . '` is not installed. Skipping...', false);
                 continue;
             }
-            
-            if($uri === '~'){
-                Bash::echo('Module `' . $name . '` is local module. Skipping...');
-                continue;
+
+            if (substr($uri, 0, 1) === '/') {
+                $uri = '~';
             }
-            if(!Module::update($here, $name, $uri, $ignore_dev))
+
+            if(!Module::update($here, $name, $uri, $ignore_dev)) {
                 return;
+            }
         }
         
         Config::init($here);
