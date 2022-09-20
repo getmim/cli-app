@@ -298,10 +298,14 @@ class Module
     
     static function install(string $here, string $module, string $uri=null, bool $ignore_dev=false): bool{
         Bash::echo('Installing module `' . $module . '`');
-        
-        // downloading the module
-        $temp = Git::download($here, $module, $uri);
-        
+
+        if ($uri === '~') {
+            $temp = Local::copy($here, $module);
+        } else {
+            // download the module
+            $temp = Git::download($here, $module, $uri);
+        }
+
         if(!$temp){
             Bash::error('Unable to get module `' . $module . '` source');
             return false;
@@ -339,7 +343,7 @@ class Module
         // Remove the tmp files
         Fs::rmdir($temp->base);
         Fs::cleanUp(dirname($temp->base));
-        
+
         return true;
     }
 
@@ -484,9 +488,14 @@ class Module
     static function update(string $here, string $module, string $uri=null, bool $ignore_dev=false): bool{
         Bash::echo('Updating module `' . $module . '`');
         
-        // downloading the module
-        $temp = Git::download($here, $module, $uri);
-        
+        if ($uri === '~') {
+            $temp = Local::copy($here, $module);
+            return true;
+        } else {
+            // download the module
+            $temp = Git::download($here, $module, $uri);
+        }
+
         if(!$temp){
             Bash::error('Unable to get module `' . $module . '` source');
             return false;
@@ -521,7 +530,7 @@ class Module
         // Remove the tmp files
         Fs::rmdir($temp->base);
         Fs::cleanUp(dirname($temp->base));
-        
+
         return true;
     }
 }
