@@ -489,7 +489,7 @@ class Module
         Bash::echo('Updating module `' . $module . '`');
         
         if ($uri === '~') {
-            $temp = Local::copy($here, $module);
+            $temp = Local::copy($here, $module, false);
         } else {
             // download the module
             $temp = Git::download($here, $module, $uri);
